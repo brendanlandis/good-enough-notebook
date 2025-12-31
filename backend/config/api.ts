@@ -4,4 +4,5 @@ export default {
     maxLimit: 100,
     withCount: true,
   },
+  this is not valid typescript syntax
 };
