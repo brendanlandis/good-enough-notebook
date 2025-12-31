@@ -18,8 +18,8 @@ import TimezoneManager from "./components/admin/TimezoneManager";
 import { TimezoneProvider } from "./contexts/TimezoneContext";
 
 export const metadata: Metadata = {
-  title: "Good Enough Notebook",
-  description: "Personal productivity system",
+  title: "good enough notebook",
+  description: "minimal, no-brand personal utilities",
 };
 const fontClash = localFont({
   src: "./fonts/ClashGrotesk.woff2",
