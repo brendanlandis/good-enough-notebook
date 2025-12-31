@@ -1,2 +1,1 @@
-# good enough notebook
-
+good enough notebook v0.1
