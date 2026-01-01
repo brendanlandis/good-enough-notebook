@@ -1,7 +1,7 @@
 import { toISODateInEST, getNowInEST } from './dateUtils';
 import { subDays } from 'date-fns';
 
-const SLOWNAMES_API_URL = process.env.STRAPI_BAND_API_URL;
+const SLOWNAMES_API_URL = process.env.NEXT_PUBLIC_STRAPI_BAND_API_URL;
 const SYSTEM_SETTINGS_TITLE = 'lastShowTodosCheck';
 
 /**
@@ -91,8 +91,8 @@ export async function createTodosFromShows(): Promise<{
     }
 
     // Fetch shows from Slownames API
-    const username = process.env.BAND_NOTEBOOK_USER;
-    const showsUrl = `${SLOWNAMES_API_URL}?pLevel=3&sort=date:desc&filters[date][$lte]=${yesterdayStr}&filters[band][users][username][$eq]=${username}`;
+    const username = process.env.NEXT_PUBLIC_BAND_NOTEBOOK_USER;
+    const showsUrl = `${SLOWNAMES_API_URL}/api/shows?pLevel=3&sort=date:desc&filters[date][$lte]=${yesterdayStr}&filters[band][users][username][$eq]=${username}`;
     
     const showsResponse = await fetch(showsUrl);
     
