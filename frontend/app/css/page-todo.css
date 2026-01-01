@@ -114,6 +114,10 @@ main:has(#admin-home) {
     overflow-wrap: break-word;
     word-break: break-word;
   }
+  .layout-everything & {
+    grid-row: auto;
+    grid-template-rows: none;
+  }
 }
 
 .todo-section h3 {
