@@ -105,7 +105,8 @@ function calculateEventDate(todo: Todo): string | null {
       
       // Always move to the next month after comparisonDate
       if (!isAfter(targetDate, startOfDay(comparisonDate))) {
-        targetDate = setDate(addMonths(comparisonDate, 1), todo.recurrenceDayOfMonth);
+        const monthAdded = addMonths(comparisonDate, 1);
+        targetDate = setDate(monthAdded, todo.recurrenceDayOfMonth);
       }
       
       return toISODateInEST(targetDate);
