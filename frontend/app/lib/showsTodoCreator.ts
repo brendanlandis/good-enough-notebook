@@ -68,17 +68,39 @@ export async function createTodosFromShows(): Promise<{
 
     const settingsData = await settingsResponse.json();
     
+    let lastCheckDate: string;
+    
     if (!settingsData.success || !settingsData.date) {
-      console.error('No lastShowTodosCheck date found in system settings');
-      return {
-        success: false,
-        todosCreated: 0,
-        showsProcessed: 0,
-        error: 'No lastShowTodosCheck date found',
-      };
-    }
+      // No lastShowTodosCheck found, create it with a date 30 days ago
+      console.log('No lastShowTodosCheck found, creating initial setting');
+      const thirtyDaysAgo = subDays(now, 30);
+      const initialDate = toISODateInEST(thirtyDaysAgo);
+      
+      const createResponse = await fetch('/api/system-settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: SYSTEM_SETTINGS_TITLE,
+          date: initialDate,
+        }),
+      });
 
-    const lastCheckDate = settingsData.date;
+      if (!createResponse.ok) {
+        console.error('Failed to create initial system setting');
+        return {
+          success: false,
+          todosCreated: 0,
+          showsProcessed: 0,
+          error: 'Failed to create initial system setting',
+        };
+      }
+
+      lastCheckDate = initialDate;
+    } else {
+      lastCheckDate = settingsData.date;
+    }
 
     // Check if we already ran today
     if (lastCheckDate >= todayStr) {
