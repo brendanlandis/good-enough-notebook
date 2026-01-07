@@ -97,6 +97,13 @@ export async function POST(
               recurrenceMonth: todo.recurrenceMonth,
               category: todo.category,
               project: todo.project ? (todo.project as any).documentId : null,
+              // Copy additional fields that were previously missing
+              soon: todo.soon,
+              long: todo.long,
+              trackingUrl: todo.trackingUrl,
+              purchaseUrl: todo.purchaseUrl,
+              price: todo.price,
+              wishListCategory: todo.wishListCategory,
             },
           }),
         });

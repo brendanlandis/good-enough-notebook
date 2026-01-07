@@ -12,7 +12,6 @@ export default function RecurringSeparateWorldLayout({
   onWorkSession,
   onRemoveWorkSession,
   onSkipRecurring,
-  skippedTodoMap,
   onEditProject,
 }: LayoutRendererProps) {
   return (
@@ -28,7 +27,6 @@ export default function RecurringSeparateWorldLayout({
             onWorkSession={onWorkSession}
             onRemoveWorkSession={onRemoveWorkSession}
             onSkipRecurring={onSkipRecurring}
-            skippedTodoMap={skippedTodoMap}
             onEditProject={onEditProject}
           />
         )}
@@ -46,7 +44,6 @@ export default function RecurringSeparateWorldLayout({
           onWorkSession={onWorkSession}
           onRemoveWorkSession={onRemoveWorkSession}
           onSkipRecurring={onSkipRecurring}
-          skippedTodoMap={skippedTodoMap}
           onEditProject={onEditProject}
         />
       )}

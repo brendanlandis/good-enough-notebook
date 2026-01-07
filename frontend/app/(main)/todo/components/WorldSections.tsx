@@ -23,7 +23,6 @@ interface WorldSectionsProps {
   onWorkSession: (documentId: string) => void;
   onRemoveWorkSession: (originalDocumentId: string, date: string) => void;
   onSkipRecurring: (documentId: string) => void;
-  skippedTodoMap: Map<string, { newTodoId: string; originalTodo: Todo }>;
   onEditProject?: (project: Project) => void;
   hideWorldName?: boolean;
 }
@@ -38,7 +37,6 @@ export default function WorldSections({
   onWorkSession,
   onRemoveWorkSession,
   onSkipRecurring,
-  skippedTodoMap,
   onEditProject,
   hideWorldName = false,
 }: WorldSectionsProps) {
@@ -90,7 +88,6 @@ export default function WorldSections({
                 onWorkSession={onWorkSession}
                 onRemoveWorkSession={onRemoveWorkSession}
                 onSkipRecurring={onSkipRecurring}
-                skippedTodoMap={skippedTodoMap}
                 onEditProject={onEditProject}
               />
             )}
@@ -108,7 +105,6 @@ export default function WorldSections({
                 onWorkSession={onWorkSession}
                 onRemoveWorkSession={onRemoveWorkSession}
                 onSkipRecurring={onSkipRecurring}
-                skippedTodoMap={skippedTodoMap}
                 onEditProject={onEditProject}
               />
             )}
@@ -126,7 +122,6 @@ export default function WorldSections({
                 onWorkSession={onWorkSession}
                 onRemoveWorkSession={onRemoveWorkSession}
                 onSkipRecurring={onSkipRecurring}
-                skippedTodoMap={skippedTodoMap}
                 onEditProject={onEditProject}
               />
             )}

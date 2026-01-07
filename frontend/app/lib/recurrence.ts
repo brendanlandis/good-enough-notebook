@@ -1,7 +1,8 @@
 import { addDays, addMonths, addYears, nextDay, setDate, setMonth, getDay, startOfMonth, lastDayOfMonth, subDays, addWeeks, isAfter, startOfDay, type Day } from 'date-fns';
 import * as Astronomy from 'astronomy-engine';
 import type { Todo } from '../types/admin';
-import { getNowInEST, getTodayInEST, toISODateInEST, parseInEST } from './dateUtils';
+import { getNowInEST, getTodayInEST, toISODateInEST, parseInEST, getTodayForRecurrence } from './dateUtils';
+import { validateRecurrenceFields } from './recurrenceSpec';
 
 /**
  * Convert day of week from our app format (1-7 where 1=Monday, 7=Sunday)
@@ -35,8 +36,8 @@ function hasEventDate(recurrenceType: string): boolean {
 
 /**
  * Calculate the next recurrence dates for a recurring todo
- * All calculations are based on today's date in EST to ensure recurring tasks
- * always appear in the future, even when completed late.
+ * All calculations respect the day boundary hour setting for determining "today"
+ * and use appropriate calculation modes based on recurrence type.
  * 
  * @param todo - The todo item with recurrence settings
  * @param isInitialCreation - True when creating a new recurring task, false when calculating next occurrence after completion
@@ -44,6 +45,13 @@ function hasEventDate(recurrenceType: string): boolean {
  */
 export function calculateNextRecurrence(todo: Todo, isInitialCreation: boolean = false): { dueDate: string | null; displayDate: string | null } {
   if (!todo.isRecurring) {
+    return { dueDate: null, displayDate: null };
+  }
+
+  // Validate that todo has required fields for its recurrence type
+  const validation = validateRecurrenceFields(todo);
+  if (!validation.valid) {
+    console.error('Invalid recurrence fields:', validation.errors);
     return { dueDate: null, displayDate: null };
   }
 
@@ -82,31 +90,49 @@ export function calculateNextRecurrence(todo: Todo, isInitialCreation: boolean =
 
 /**
  * Calculate the next event date (for recurrence types with specific event dates)
+ * Uses max(completionDate, eventDate) to prevent duplicate occurrences
+ * 
  * @param todo - The todo item with recurrence settings
  * @returns The next event date as ISO string, or null
  */
 function calculateEventDate(todo: Todo): string | null {
-  const today = getTodayInEST();
-  // For comparison, use the todo's current dueDate if it exists (for tasks with offset),
-  // otherwise use displayDate (for tasks without offset), otherwise use today
-  // This ensures we always move to the NEXT occurrence when completing a recurring task
-  const comparisonDate = todo.dueDate 
+  const today = getTodayForRecurrence();
+  
+  // Reference date is the later of: completion date or existing event date
+  // This prevents creating duplicate events when completing before the event date
+  const existingEventDate = todo.dueDate 
     ? parseInEST(todo.dueDate) 
     : todo.displayDate 
     ? parseInEST(todo.displayDate) 
+    : null;
+  
+  const comparisonDate = existingEventDate && existingEventDate > today
+    ? existingEventDate
     : today;
 
   switch (todo.recurrenceType) {
     case 'monthly date':
       if (!todo.recurrenceDayOfMonth) return null;
       
+      // Helper to set day of month, using last day if target doesn't exist
+      const setDayOfMonth = (baseDate: Date, targetDay: number): Date => {
+        const lastDay = lastDayOfMonth(baseDate);
+        const lastDayNum = lastDay.getDate();
+        
+        if (targetDay > lastDayNum) {
+          // Month doesn't have this day (e.g., Feb 31), use last day
+          return lastDay;
+        }
+        return setDate(baseDate, targetDay);
+      };
+      
       // Start from comparisonDate and find the next occurrence
-      let targetDate = setDate(comparisonDate, todo.recurrenceDayOfMonth);
+      let targetDate = setDayOfMonth(comparisonDate, todo.recurrenceDayOfMonth);
       
       // Always move to the next month after comparisonDate
       if (!isAfter(targetDate, startOfDay(comparisonDate))) {
         const monthAdded = addMonths(comparisonDate, 1);
-        targetDate = setDate(monthAdded, todo.recurrenceDayOfMonth);
+        targetDate = setDayOfMonth(monthAdded, todo.recurrenceDayOfMonth);
       }
       
       return toISODateInEST(targetDate);
@@ -168,13 +194,26 @@ function calculateEventDate(todo: Todo): string | null {
         return null;
       }
       
+      // Helper to set annual date, using last day if target doesn't exist (e.g., Feb 29 in non-leap year)
+      const setAnnualDate = (baseDate: Date, month: number, day: number): Date => {
+        const withMonth = setMonth(baseDate, month - 1);
+        const lastDay = lastDayOfMonth(withMonth);
+        const lastDayNum = lastDay.getDate();
+        
+        if (day > lastDayNum) {
+          // Day doesn't exist in this month/year, use last day
+          return lastDay;
+        }
+        return setDate(withMonth, day);
+      };
+      
       // Start from comparisonDate and find the next occurrence
-      let annualDate = setMonth(comparisonDate, todo.recurrenceMonth - 1);
-      annualDate = setDate(annualDate, todo.recurrenceDayOfMonth);
+      let annualDate = setAnnualDate(comparisonDate, todo.recurrenceMonth, todo.recurrenceDayOfMonth);
       
       // Always move to the next year after comparisonDate
       if (!isAfter(annualDate, startOfDay(comparisonDate))) {
-        annualDate = addYears(annualDate, 1);
+        const nextYear = addYears(comparisonDate, 1);
+        annualDate = setAnnualDate(nextYear, todo.recurrenceMonth, todo.recurrenceDayOfMonth);
       }
       
       return toISODateInEST(annualDate);
@@ -254,15 +293,15 @@ function calculateEventDate(todo: Todo): string | null {
 
 /**
  * Calculate the next display date for a recurring todo (for types with only displayDate)
+ * Respects day boundary hour for determining "today"
+ * 
  * @param todo - The todo item with recurrence settings
  * @param isInitialCreation - True when creating a new recurring task
  * @returns The next display date as ISO string, or null
  */
 function calculateNextDisplayDate(todo: Todo, isInitialCreation: boolean = false): string | null {
-  // Always calculate from the start of today in EST (midnight)
-  // Using getTodayInEST() instead of getNowInEST() ensures consistent day-based calculations
-  // regardless of what time of day the calculation runs or the server's timezone
-  const today = getTodayInEST();
+  // Use getTodayForRecurrence() which respects day boundary hour
+  const today = getTodayForRecurrence();
 
   switch (todo.recurrenceType) {
     case 'daily':
@@ -288,12 +327,22 @@ function calculateNextDisplayDate(todo: Todo, isInitialCreation: boolean = false
       const dayOfWeek = toJSDay(todo.recurrenceDayOfWeek);
       
       if (isInitialCreation) {
-        // On initial creation, display today
-        return toISODateInEST(today);
+        // On initial creation, find next occurrence of target weekday (not today)
+        const nextWeekDay = nextDay(today, dayOfWeek as Day);
+        return toISODateInEST(nextWeekDay);
       }
-      // After completion, get next occurrence of the specified day of week after today
-      const nextWeekDay = nextDay(today, dayOfWeek as Day);
-      return toISODateInEST(nextWeekDay);
+      
+      // After completion, find next occurrence of target weekday
+      const completionDay = getDay(today);
+      
+      if (completionDay === dayOfWeek) {
+        // Completed on the correct day, next occurrence is 7 days later
+        return toISODateInEST(addDays(today, 7));
+      } else {
+        // Completed on different day, find next occurrence of target day
+        const nextWeekDay = nextDay(today, dayOfWeek as Day);
+        return toISODateInEST(nextWeekDay);
+      }
 
     case 'biweekly':
       if (todo.recurrenceDayOfWeek === null || todo.recurrenceDayOfWeek === undefined) return null;
@@ -301,12 +350,21 @@ function calculateNextDisplayDate(todo: Todo, isInitialCreation: boolean = false
       const biweeklyDayOfWeek = toJSDay(todo.recurrenceDayOfWeek);
       
       if (isInitialCreation) {
-        // On initial creation, display today
-        return toISODateInEST(today);
+        // On initial creation, find next occurrence of target weekday
+        const nextBiweeklyDay = nextDay(today, biweeklyDayOfWeek as Day);
+        return toISODateInEST(nextBiweeklyDay);
       }
-      // After completion, get next occurrence of the specified day of week, then add 2 weeks
-      const nextBiweeklyDay = nextDay(today, biweeklyDayOfWeek as Day);
-      return toISODateInEST(addWeeks(nextBiweeklyDay, 2));
+      
+      // After completion, maintain 14-day cycle from displayDate anchor
+      // Add 14 days repeatedly until we get a future date
+      if (!todo.displayDate) return null;
+      
+      let nextDate = parseInEST(todo.displayDate);
+      do {
+        nextDate = addDays(nextDate, 14);
+      } while (nextDate <= today);
+      
+      return toISODateInEST(nextDate);
 
     default:
       return null;

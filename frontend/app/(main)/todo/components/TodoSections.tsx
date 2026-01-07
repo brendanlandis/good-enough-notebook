@@ -20,7 +20,6 @@ interface TodoSectionsProps {
   onWorkSession: (documentId: string) => void;
   onRemoveWorkSession: (originalDocumentId: string, date: string) => void;
   onSkipRecurring: (documentId: string) => void;
-  skippedTodoMap: Map<string, { newTodoId: string; originalTodo: Todo }>;
   showProjectName?: boolean;
   onEditProject?: (project: Project) => void;
   upcomingSection?: React.ReactNode;
@@ -36,7 +35,6 @@ export default function TodoSections({
   onWorkSession,
   onRemoveWorkSession,
   onSkipRecurring,
-  skippedTodoMap,
   showProjectName = false,
   onEditProject,
   upcomingSection,
@@ -89,7 +87,6 @@ export default function TodoSections({
                   onWorkSession={onWorkSession}
                   onRemoveWorkSession={onRemoveWorkSession}
                   onSkipRecurring={onSkipRecurring}
-                  isSkipped={skippedTodoMap.has(todo.documentId)}
                   showProjectName={showProjectName}
                 />
               ))}
@@ -112,7 +109,6 @@ export default function TodoSections({
                 onWorkSession={onWorkSession}
                 onRemoveWorkSession={onRemoveWorkSession}
                 onSkipRecurring={onSkipRecurring}
-                isSkipped={skippedTodoMap.has(todo.documentId)}
                 showProjectName={showProjectName}
               />
             ))}

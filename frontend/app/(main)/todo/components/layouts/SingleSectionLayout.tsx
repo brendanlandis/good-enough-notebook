@@ -16,7 +16,6 @@ export default function SingleSectionLayout({
   onWorkSession,
   onRemoveWorkSession,
   onSkipRecurring,
-  skippedTodoMap,
   onEditProject,
   recentStatsSection,
   selectedRulesetId,
@@ -30,7 +29,6 @@ export default function SingleSectionLayout({
       onWorkSession={onWorkSession}
       onRemoveWorkSession={onRemoveWorkSession}
       onSkipRecurring={onSkipRecurring}
-      skippedTodoMap={skippedTodoMap}
     />
   );
 
@@ -116,7 +114,6 @@ export default function SingleSectionLayout({
                     onWorkSession={onWorkSession}
                     onRemoveWorkSession={onRemoveWorkSession}
                     onSkipRecurring={onSkipRecurring}
-                    isSkipped={skippedTodoMap.has(todo.documentId)}
                     showProjectName={true}
                   />
                 ))}
@@ -141,7 +138,6 @@ export default function SingleSectionLayout({
         onWorkSession={onWorkSession}
         onRemoveWorkSession={onRemoveWorkSession}
         onSkipRecurring={onSkipRecurring}
-        skippedTodoMap={skippedTodoMap}
         showProjectName={true}
         onEditProject={onEditProject}
         upcomingSection={upcomingSection}

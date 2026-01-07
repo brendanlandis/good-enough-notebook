@@ -20,7 +20,6 @@ interface TodoItemProps {
   onWorkSession: (documentId: string) => void;
   onRemoveWorkSession?: (originalDocumentId: string, date: string) => void;
   onSkipRecurring: (documentId: string) => void;
-  isSkipped?: boolean;
   showProjectName?: boolean;
 }
 
@@ -32,7 +31,6 @@ export default function TodoItem({
   onWorkSession,
   onRemoveWorkSession,
   onSkipRecurring,
-  isSkipped = false,
   showProjectName = false,
 }: TodoItemProps) {
   const [isChecked, setIsChecked] = useState(todo.completed);
@@ -110,7 +108,7 @@ export default function TodoItem({
   };
 
   return (
-    <li className={isChecked || isSkipped ? 'completed' : ''}>
+    <li className={isChecked ? 'completed' : ''}>
       <div className="todo-item-main">
         <input
           type="checkbox"

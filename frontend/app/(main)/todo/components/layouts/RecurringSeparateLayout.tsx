@@ -11,7 +11,6 @@ export default function RecurringSeparateLayout({
   onWorkSession,
   onRemoveWorkSession,
   onSkipRecurring,
-  skippedTodoMap,
   onEditProject,
 }: LayoutRendererProps) {
   return (
@@ -27,7 +26,6 @@ export default function RecurringSeparateLayout({
             onWorkSession={onWorkSession}
             onRemoveWorkSession={onRemoveWorkSession}
             onSkipRecurring={onSkipRecurring}
-            skippedTodoMap={skippedTodoMap}
             onEditProject={onEditProject}
           />
         )}
@@ -43,7 +41,6 @@ export default function RecurringSeparateLayout({
             onWorkSession={onWorkSession}
             onRemoveWorkSession={onRemoveWorkSession}
             onSkipRecurring={onSkipRecurring}
-            skippedTodoMap={skippedTodoMap}
             onEditProject={onEditProject}
           />
         )}

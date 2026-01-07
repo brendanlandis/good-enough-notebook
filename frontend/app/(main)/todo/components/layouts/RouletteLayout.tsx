@@ -12,7 +12,6 @@ export default function RouletteLayout({
   onWorkSession,
   onRemoveWorkSession,
   onSkipRecurring,
-  skippedTodoMap,
 }: LayoutRendererProps) {
   const randomTodo = useMemo(() => {
     const todos = transformedData.rouletteTodos || [];
@@ -41,7 +40,6 @@ export default function RouletteLayout({
             onWorkSession={onWorkSession}
             onRemoveWorkSession={onRemoveWorkSession}
             onSkipRecurring={onSkipRecurring}
-            isSkipped={skippedTodoMap.has(randomTodo.documentId)}
             showProjectName={true}
           />
         </ul>

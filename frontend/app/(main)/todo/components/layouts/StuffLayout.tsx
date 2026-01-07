@@ -11,7 +11,6 @@ export default function StuffLayout({
   onWorkSession,
   onRemoveWorkSession,
   onSkipRecurring,
-  skippedTodoMap,
   onEditProject,
 }: LayoutRendererProps) {
   if (!transformedData.allSections || transformedData.allSections.length === 0) {
@@ -46,7 +45,6 @@ export default function StuffLayout({
           onWorkSession={onWorkSession}
           onRemoveWorkSession={onRemoveWorkSession}
           onSkipRecurring={onSkipRecurring}
-          skippedTodoMap={skippedTodoMap}
           onEditProject={onEditProject}
         />
       )}
@@ -62,7 +60,6 @@ export default function StuffLayout({
           onWorkSession={onWorkSession}
           onRemoveWorkSession={onRemoveWorkSession}
           onSkipRecurring={onSkipRecurring}
-          skippedTodoMap={skippedTodoMap}
           onEditProject={onEditProject}
         />
       )}

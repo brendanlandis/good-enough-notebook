@@ -11,7 +11,6 @@ export default function ChoresLayout({
   onWorkSession,
   onRemoveWorkSession,
   onSkipRecurring,
-  skippedTodoMap,
   onEditProject,
 }: LayoutRendererProps) {
   return (
@@ -26,7 +25,6 @@ export default function ChoresLayout({
         onWorkSession={onWorkSession}
         onRemoveWorkSession={onRemoveWorkSession}
         onSkipRecurring={onSkipRecurring}
-        skippedTodoMap={skippedTodoMap}
         onEditProject={onEditProject}
       />
     ) : null

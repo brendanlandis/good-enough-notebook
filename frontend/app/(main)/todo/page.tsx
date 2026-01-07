@@ -12,7 +12,9 @@ import {
   parseInEST,
   getISOTimestampInEST,
   toISODateInEST,
+  getNowInEST,
 } from "@/app/lib/dateUtils";
+import { getCompletedTaskVisibilityMinutes } from "@/app/lib/completedTaskVisibilityConfig";
 import {
   transformLayout,
   type RawTodoData,
@@ -53,14 +55,6 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [drawerContainer, setDrawerContainer] = useState<HTMLElement | null>(
     null
-  );
-  // Track mapping of completed recurring todos to their newly created next instances
-  const [recurringTodoMap, setRecurringTodoMap] = useState<Map<string, string>>(
-    new Map()
-  );
-  // Track mapping of skipped recurring todos: original ID -> { newTodoId, originalTodo }
-  const [skippedTodoMap, setSkippedTodoMap] = useState<Map<string, { newTodoId: string; originalTodo: Todo }>>(
-    new Map()
   );
   const { selectedRulesetId } = useLayoutRuleset();
   const { drawerContent, openTodoForm, openProjectForm, closeDrawer } =
@@ -129,8 +123,12 @@ export default function AdminDashboard() {
         const allTodos: Todo[] = result.data;
 
         // Filter out long todos that have been worked on today
+        // Also filter out completed todos that are older than visibility window
         const today = getTodayInEST();
+        const now = getNowInEST();
         const todayDateString = toISODateInEST(today);
+        const visibilityMinutes = getCompletedTaskVisibilityMinutes();
+        
         const visibleTodos = allTodos.filter((todo: Todo) => {
           // If it's a long todo and has been worked on today, hide it
           if (
@@ -140,6 +138,18 @@ export default function AdminDashboard() {
           ) {
             return false;
           }
+          
+          // If it's completed, check if it's within visibility window
+          if (todo.completed && todo.completedAt) {
+            const completedTime = new Date(todo.completedAt);
+            const minutesSinceCompletion = (now.getTime() - completedTime.getTime()) / (1000 * 60);
+            
+            if (minutesSinceCompletion > visibilityMinutes) {
+              // Completed too long ago, don't show in main list
+              return false;
+            }
+          }
+          
           return true;
         });
 
@@ -399,48 +409,6 @@ export default function AdminDashboard() {
 
         if (response.ok) {
           result = await response.json();
-
-          // If this was a recurring todo that created a next instance, delete it
-          if (currentTodo.isRecurring && recurringTodoMap.has(documentId)) {
-            const newTodoId = recurringTodoMap.get(documentId)!;
-
-            // Delete the next instance from the database
-            await fetch(`/api/todos/${newTodoId}`, {
-              method: "DELETE",
-            });
-
-            // Remove from the map
-            setRecurringTodoMap((prev) => {
-              const newMap = new Map(prev);
-              newMap.delete(documentId);
-              return newMap;
-            });
-
-            // Remove from state arrays
-            setRecurringProjects((prev) =>
-              prev
-                .map((project) => ({
-                  ...project,
-                  todos:
-                    project.todos?.filter((t) => t.documentId !== newTodoId) ||
-                    [],
-                }))
-                .filter((project) => (project.todos?.length || 0) > 0)
-            );
-
-            setRecurringCategoryGroups((prev) =>
-              prev
-                .map((group) => ({
-                  ...group,
-                  todos: group.todos.filter((t) => t.documentId !== newTodoId),
-                }))
-                .filter((group) => group.todos.length > 0)
-            );
-
-            setRecurringIncidentals((prev) =>
-              prev.filter((t) => t.documentId !== newTodoId)
-            );
-          }
         }
       } else {
         // Complete the todo
@@ -636,16 +604,9 @@ export default function AdminDashboard() {
           setCompletedTodos((prev) => [completedTodo, ...prev]);
         }
 
-        // If a new recurring todo was created, track it and add to list if appropriate
+        // If a new recurring todo was created, add to list if appropriate
         if (result.newTodo) {
           const newTodo = result.newTodo;
-
-          // Track the relationship between the completed todo and its new instance
-          setRecurringTodoMap((prev) => {
-            const newMap = new Map(prev);
-            newMap.set(documentId, newTodo.documentId);
-            return newMap;
-          });
 
           // Check if the new todo should be shown yet (same logic as initial fetch)
           const shouldShow =
@@ -936,195 +897,42 @@ export default function AdminDashboard() {
 
   const handleSkipRecurring = async (documentId: string) => {
     try {
-      const isAlreadySkipped = skippedTodoMap.has(documentId);
+      // Skip logic is now simple: call the API which handles everything
+      const response = await fetch(`/api/todos/${documentId}/skip`, {
+        method: "POST",
+      });
 
-      if (isAlreadySkipped) {
-        // Unskip: delete the new recurrence and recreate the original
-        const skippedData = skippedTodoMap.get(documentId)!;
-        const newTodoId = skippedData.newTodoId;
-        const originalTodo = skippedData.originalTodo;
+      if (response.ok) {
+        const result = await response.json();
+        
+        // Remove the skipped todo from visible state
+        setRecurringProjects((prev) =>
+          prev
+            .map((project) => ({
+              ...project,
+              todos:
+                project.todos?.filter((t) => t.documentId !== documentId) || [],
+            }))
+            .filter((project) => (project.todos?.length || 0) > 0)
+        );
 
-        // Delete the new instance from the database
-        await fetch(`/api/todos/${newTodoId}`, {
-          method: "DELETE",
-        });
+        setRecurringCategoryGroups((prev) =>
+          prev
+            .map((group) => ({
+              ...group,
+              todos: group.todos.filter((t) => t.documentId !== documentId),
+            }))
+            .filter((group) => group.todos.length > 0)
+        );
 
-        // Recreate the original todo in the database (use same format as skip route)
-        const recreateResponse = await fetch("/api/todos", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: originalTodo.title,
-            description: originalTodo.description,
-            dueDate: originalTodo.dueDate,
-            displayDate: originalTodo.displayDate,
-            displayDateOffset: originalTodo.displayDateOffset,
-            completed: false,
-            completedAt: null,
-            isRecurring: originalTodo.isRecurring,
-            recurrenceType: originalTodo.recurrenceType,
-            recurrenceInterval: originalTodo.recurrenceInterval,
-            recurrenceDayOfWeek: originalTodo.recurrenceDayOfWeek,
-            recurrenceDayOfMonth: originalTodo.recurrenceDayOfMonth,
-            recurrenceWeekOfMonth: originalTodo.recurrenceWeekOfMonth,
-            recurrenceDayOfWeekMonthly: originalTodo.recurrenceDayOfWeekMonthly,
-            recurrenceMonth: originalTodo.recurrenceMonth,
-            category: originalTodo.category,
-            project: originalTodo.project ? (originalTodo.project as any).documentId : null,
-            soon: originalTodo.soon,
-            long: originalTodo.long,
-            trackingUrl: originalTodo.trackingUrl,
-            purchaseUrl: originalTodo.purchaseUrl,
-            price: originalTodo.price,
-            wishListCategory: originalTodo.wishListCategory,
-          }),
-        });
-
-        if (recreateResponse.ok) {
-          const result = await recreateResponse.json();
-          const recreatedTodo = result.data;
-
-          // Remove from the skip map
-          setSkippedTodoMap((prev) => {
-            const newMap = new Map(prev);
-            newMap.delete(documentId);
-            return newMap;
-          });
-          
-          // Remove the old todo (with old documentId) and add the recreated one (with new documentId)
-          if (recreatedTodo.project) {
-            if (recreatedTodo.isRecurring) {
-              setRecurringProjects((prev) =>
-                prev.map((project) => {
-                  if (project.documentId === (recreatedTodo.project as any).documentId) {
-                    return {
-                      ...project,
-                      todos: [
-                        ...(project.todos?.filter((t) => t.documentId !== documentId) || []),
-                        recreatedTodo,
-                      ],
-                    };
-                  }
-                  return project;
-                })
-              );
-            } else {
-              setProjects((prev) =>
-                prev.map((project) => {
-                  if (project.documentId === (recreatedTodo.project as any).documentId) {
-                    return {
-                      ...project,
-                      todos: [
-                        ...(project.todos?.filter((t) => t.documentId !== documentId) || []),
-                        recreatedTodo,
-                      ],
-                    };
-                  }
-                  return project;
-                })
-              );
-            }
-          } else if (recreatedTodo.category) {
-            if (recreatedTodo.isRecurring) {
-              setRecurringCategoryGroups((prev) =>
-                prev.map((group) => {
-                  if (group.title === recreatedTodo.category) {
-                    return {
-                      ...group,
-                      todos: [
-                        ...group.todos.filter((t) => t.documentId !== documentId),
-                        recreatedTodo,
-                      ],
-                    };
-                  }
-                  return group;
-                })
-              );
-            } else {
-              setCategoryGroups((prev) =>
-                prev.map((group) => {
-                  if (group.title === recreatedTodo.category) {
-                    return {
-                      ...group,
-                      todos: [
-                        ...group.todos.filter((t) => t.documentId !== documentId),
-                        recreatedTodo,
-                      ],
-                    };
-                  }
-                  return group;
-                })
-              );
-            }
-          } else {
-            // Incidental
-            if (recreatedTodo.isRecurring) {
-              setRecurringIncidentals((prev) => [
-                ...prev.filter((t) => t.documentId !== documentId),
-                recreatedTodo,
-              ]);
-            } else {
-              setIncidentals((prev) => [
-                ...prev.filter((t) => t.documentId !== documentId),
-                recreatedTodo,
-              ]);
-            }
-          }
-        }
-      } else {
-        // Skip: delete original from DB, create next recurrence, keep original visible in state
-        // Find the todo
-        let currentTodo: Todo | undefined;
-
-        for (const project of [...projects, ...recurringProjects]) {
-          currentTodo = project.todos?.find((t) => t.documentId === documentId);
-          if (currentTodo) break;
-        }
-
-        if (!currentTodo) {
-          for (const group of [...categoryGroups, ...recurringCategoryGroups]) {
-            currentTodo = group.todos.find((t) => t.documentId === documentId);
-            if (currentTodo) break;
-          }
-        }
-
-        if (!currentTodo) {
-          currentTodo = [...incidentals, ...recurringIncidentals].find(
-            (t) => t.documentId === documentId
-          );
-        }
-
-        if (!currentTodo) {
-          console.error("Todo not found");
-          return;
-        }
-
-        const response = await fetch(`/api/todos/${documentId}/skip`, {
-          method: "POST",
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-
-          // Track the skip in our map with the original todo data
-          // The original todo stays in state with its documentId, and will appear with .completed class
-          if (result.newTodo && result.deletedTodo) {
-            setSkippedTodoMap((prev) => {
-              const newMap = new Map(prev);
-              newMap.set(documentId, {
-                newTodoId: result.newTodo.documentId,
-                originalTodo: result.deletedTodo,
-              });
-              return newMap;
-            });
-
-            // DO NOT add the new recurrence to visible state
-            // It will appear on next page load when its displayDate arrives
-          }
-        }
+        setRecurringIncidentals((prev) =>
+          prev.filter((t) => t.documentId !== documentId)
+        );
+        
+        // The new todo will appear when its displayDate arrives (on page refresh)
       }
     } catch (err) {
-      console.error("Error skipping/unskipping recurring todo:", err);
+      console.error("Error skipping recurring todo:", err);
     }
   };
 
@@ -1301,7 +1109,6 @@ export default function AdminDashboard() {
             onWorkSession={handleWorkSession}
             onRemoveWorkSession={handleRemoveWorkSession}
             onSkipRecurring={handleSkipRecurring}
-            skippedTodoMap={skippedTodoMap}
             onEditProject={handleEditProject}
             recentStatsSection={
               selectedRulesetId === "done" &&

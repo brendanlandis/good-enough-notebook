@@ -16,7 +16,6 @@ interface UpcomingSectionProps {
   onWorkSession: (documentId: string) => void;
   onRemoveWorkSession: (originalDocumentId: string, date: string) => void;
   onSkipRecurring: (documentId: string) => void;
-  skippedTodoMap: Map<string, { newTodoId: string; originalTodo: Todo }>;
 }
 
 export default function UpcomingSection({
@@ -27,7 +26,6 @@ export default function UpcomingSection({
   onWorkSession,
   onRemoveWorkSession,
   onSkipRecurring,
-  skippedTodoMap,
 }: UpcomingSectionProps) {
   if (!upcomingTodosByDay || upcomingTodosByDay.length === 0) {
     return null;
@@ -62,7 +60,6 @@ export default function UpcomingSection({
                     onWorkSession={onWorkSession}
                     onRemoveWorkSession={onRemoveWorkSession}
                     onSkipRecurring={onSkipRecurring}
-                    isSkipped={skippedTodoMap.has(todo.documentId)}
                     showProjectName={true}
                   />
                 ))}

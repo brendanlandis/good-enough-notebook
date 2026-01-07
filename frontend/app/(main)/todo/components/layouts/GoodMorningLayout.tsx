@@ -11,7 +11,6 @@ export default function GoodMorningLayout({
   onWorkSession,
   onRemoveWorkSession,
   onSkipRecurring,
-  skippedTodoMap,
   onEditProject,
 }: LayoutRendererProps) {
   return (
@@ -27,7 +26,6 @@ export default function GoodMorningLayout({
           onWorkSession={onWorkSession}
           onRemoveWorkSession={onRemoveWorkSession}
           onSkipRecurring={onSkipRecurring}
-          skippedTodoMap={skippedTodoMap}
           onEditProject={onEditProject}
         />
       ) : null}
@@ -48,7 +46,6 @@ export default function GoodMorningLayout({
           onWorkSession={onWorkSession}
           onRemoveWorkSession={onRemoveWorkSession}
           onSkipRecurring={onSkipRecurring}
-          skippedTodoMap={skippedTodoMap}
           onEditProject={onEditProject}
         />
       ) : null}

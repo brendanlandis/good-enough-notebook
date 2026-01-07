@@ -13,7 +13,6 @@ export default function WorldLayout({
   onWorkSession,
   onRemoveWorkSession,
   onSkipRecurring,
-  skippedTodoMap,
   onEditProject,
   selectedRulesetId,
 }: LayoutRendererProps) {
@@ -27,7 +26,6 @@ export default function WorldLayout({
         onWorkSession={onWorkSession}
         onRemoveWorkSession={onRemoveWorkSession}
         onSkipRecurring={onSkipRecurring}
-        skippedTodoMap={skippedTodoMap}
         onEditProject={onEditProject}
         hideWorldName={SINGLE_WORLD_LAYOUTS.includes(selectedRulesetId || "")}
       />

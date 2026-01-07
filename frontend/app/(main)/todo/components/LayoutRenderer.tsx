@@ -24,7 +24,6 @@ interface LayoutRendererComponentProps {
   onWorkSession: (documentId: string) => void;
   onRemoveWorkSession: (originalDocumentId: string, date: string) => void;
   onSkipRecurring: (documentId: string) => void;
-  skippedTodoMap: Map<string, { newTodoId: string; originalTodo: Todo }>;
   onEditProject?: (project: Project) => void;
   recentStatsSection?: React.ReactNode;
 }
@@ -55,7 +54,6 @@ export default function LayoutRenderer({
   onWorkSession,
   onRemoveWorkSession,
   onSkipRecurring,
-  skippedTodoMap,
   onEditProject,
   recentStatsSection,
 }: LayoutRendererComponentProps) {
@@ -74,7 +72,6 @@ export default function LayoutRenderer({
       onWorkSession={onWorkSession}
       onRemoveWorkSession={onRemoveWorkSession}
       onSkipRecurring={onSkipRecurring}
-      skippedTodoMap={skippedTodoMap}
       onEditProject={onEditProject}
       recentStatsSection={recentStatsSection}
     />
