@@ -48,3 +48,9 @@ If you'd like to use the current version, there is a bit of setup. Without getti
 - Open up Strapi, make a user, remember your username.
 - With Strapi running, you'll then need to `cd` into the `/frontend` directory, and do another `npm install` and `npm run dev` (not `develop` this time).
 - The `/frontend` app has another `.env.example` file, which you'll want to configure and rename to `.env`. (Don't worry about the band stuff for now, that's an experimental feature.)
+
+## AI Disclosure
+
+I'm using Claude to write a lot of this code, but I'm generally reviewing what I check in. As a frontend guy of over 20 years, I have a pretty good amount of experience to bring to this new workflow.
+
+That said, I never use AI for writing, or pretty much anything else.
