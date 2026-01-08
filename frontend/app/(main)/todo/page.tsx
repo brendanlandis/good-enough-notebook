@@ -15,7 +15,7 @@ import {
   toISODateInEST,
   getNowInEST,
 } from "@/app/lib/dateUtils";
-import { getCompletedTaskVisibilityMinutes } from "@/app/lib/completedTaskVisibilityConfig";
+import { getCompletedTaskVisibilityMinutes, fetchVisibilityMinutesFromStrapi } from "@/app/lib/completedTaskVisibilityConfig";
 import {
   transformLayout,
   type RawTodoData,
@@ -63,7 +63,12 @@ export default function TodoPage() {
   const { timezone } = useTimezoneContext();
 
   useEffect(() => {
-    fetchTodos();
+    // Fetch visibility settings first to populate cache before filtering todos
+    const initializeAndFetchTodos = async () => {
+      await fetchVisibilityMinutesFromStrapi();
+      fetchTodos();
+    };
+    initializeAndFetchTodos();
   }, []);
 
   useEffect(() => {
