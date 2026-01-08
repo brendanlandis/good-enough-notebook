@@ -1450,7 +1450,9 @@ export function transformLayout(data: RawTodoData, ruleset: LayoutRuleset): Tran
       .sort(([dateA], [dateB]) => {
         // Sort dates descending (most recent first)
         return dateB.localeCompare(dateA);
-      })
+      });
+
+    const finalDateSections: TodoGroup[] = dateSections
       .map(([dateKey, todos]) => {
         // Format the date for display
         const date = parseInEST(dateKey);
@@ -1533,7 +1535,7 @@ export function transformLayout(data: RawTodoData, ruleset: LayoutRuleset): Tran
     }
 
     return {
-      allSections: dateSections,
+      allSections: finalDateSections,
       upcomingTodosByDay: upcomingDaySections,
     };
   }

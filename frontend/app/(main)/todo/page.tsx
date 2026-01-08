@@ -1056,7 +1056,8 @@ export default function AdminDashboard() {
       longTodosWithSessions:
         selectedRulesetId === "done" ? longTodosWithSessions : undefined,
     };
-    return transformLayout(rawData, ruleset);
+    const result = transformLayout(rawData, ruleset);
+    return result;
   }, [
     selectedRulesetId,
     projects,
@@ -1095,12 +1096,13 @@ export default function AdminDashboard() {
     recurringProjects.length > 0 ||
     recurringCategoryGroups.length > 0 ||
     recurringIncidentals.length > 0;
+  const hasCompletedTodos = completedTodos.length > 0;
 
   return (
     <>
       <FaviconManager type="broom" />
       <div id="admin-home" className={layoutClass} suppressHydrationWarning>
-        {!hasAnyTodos && !hasRecurringTodos ? (
+        {!hasAnyTodos && !hasRecurringTodos && !hasCompletedTodos ? (
           <p>nothin' to do, nowhere to be</p>
         ) : (
           <LayoutRenderer
