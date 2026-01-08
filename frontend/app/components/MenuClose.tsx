@@ -4,7 +4,7 @@ import { XIcon } from "@phosphor-icons/react";
 export default function MenuClose() {
   const closeDrawer = () => {
     const drawerCheckbox = document.getElementById(
-      'adminMenu'
+      'mainMenu'
     ) as HTMLInputElement;
     if (drawerCheckbox) drawerCheckbox.checked = false;
   };

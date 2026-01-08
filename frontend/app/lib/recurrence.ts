@@ -1,6 +1,6 @@
 import { addDays, addMonths, addYears, nextDay, setDate, setMonth, getDay, startOfMonth, lastDayOfMonth, subDays, addWeeks, isAfter, startOfDay, type Day } from 'date-fns';
 import * as Astronomy from 'astronomy-engine';
-import type { Todo } from '../types/admin';
+import type { Todo } from '../types/index';
 import { getNowInEST, getTodayInEST, toISODateInEST, parseInEST, getTodayForRecurrence } from './dateUtils';
 import { validateRecurrenceFields } from './recurrenceSpec';
 

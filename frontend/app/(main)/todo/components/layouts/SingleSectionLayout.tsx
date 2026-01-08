@@ -5,7 +5,7 @@ import TodoSections from "../TodoSections";
 import UpcomingSection from "../UpcomingSection";
 import TodoItem from "../TodoItem";
 import type { LayoutRendererProps } from "./types";
-import type { Todo } from "@/app/types/admin";
+import type { Todo } from "@/app/types/index";
 import { format, parseISO } from "date-fns";
 
 export default function SingleSectionLayout({

@@ -7,7 +7,7 @@ import {
   isTomorrow,
 } from "date-fns";
 import { useState, useEffect } from "react";
-import type { Todo } from "@/app/types/admin";
+import type { Todo } from "@/app/types/index";
 import { PencilIcon, TrashIcon, MapPinIcon, LinkIcon, CookieIcon, ArrowClockwiseIcon } from "@phosphor-icons/react";
 import { getNowInEST, parseInEST, formatInEST } from "@/app/lib/dateUtils";
 import RichTextDisplay from "@/app/components/RichTextDisplay";

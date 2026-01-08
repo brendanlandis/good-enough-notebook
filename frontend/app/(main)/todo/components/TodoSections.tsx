@@ -1,7 +1,7 @@
 "use client";
 
 import TodoItem from "./TodoItem";
-import type { Project, Todo } from "@/app/types/admin";
+import type { Project, Todo } from "@/app/types/index";
 import { PencilIcon } from "@phosphor-icons/react";
 
 interface TodoGroup {

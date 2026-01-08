@@ -4,7 +4,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
-import type { Project, World, ProjectImportance, StrapiBlock } from "@/app/types/admin";
+import type { Project, World, ProjectImportance, StrapiBlock } from "@/app/types/index";
 import RichTextEditor from "@/app/components/RichTextEditor";
 
 const schema = z.object({

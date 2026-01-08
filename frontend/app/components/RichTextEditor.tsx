@@ -5,7 +5,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import { useEffect, useRef, useCallback, useState } from 'react';
-import type { StrapiBlock } from '@/app/types/admin';
+import type { StrapiBlock } from '@/app/types/index';
 import { strapiBlocksToTiptap, tiptapToStrapiBlocks } from '@/app/lib/strapiBlocksConverter';
 import {
   TextB,

@@ -1,4 +1,4 @@
-main:has(#admin-home) {
+#container-todo {
   text-align: center;
 }
 

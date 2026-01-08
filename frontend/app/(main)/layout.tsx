@@ -1,15 +1,11 @@
-import { ListIcon, GearIcon } from "@phosphor-icons/react/dist/ssr";
-import Link from "next/link";
-import ThemeToggle from "../components/ThemeToggle";
-import MenuClose from "../components/MenuClose";
-import LogoutButton from "../components/LogoutButton";
+import { ListIcon } from "@phosphor-icons/react/dist/ssr";
 import MenuItems from "../components/MenuItems";
 import HeaderContent from "../components/HeaderContent";
 import TodoActionsDrawer from "../components/TodoActionsDrawer";
 import { LayoutRulesetProvider } from "../contexts/LayoutRulesetContext";
 import { PracticeContextProvider } from "../contexts/PracticeContext";
 import { TodoActionsProvider } from "../contexts/TodoActionsContext";
-import AdminHeaderIcon from "../components/AdminHeaderIcon";
+import HeaderIcon from "../components/HeaderIcon";
 import EscapeKeyHandler from "../components/EscapeKeyHandler";
 
 export default function MainLayout({
@@ -31,7 +27,7 @@ export default function MainLayout({
             <div className="drawer-content">
               <div className="drawer drawer-end">
                 <input
-                  id="adminMenu"
+                  id="mainMenu"
                   type="checkbox"
                   className="drawer-toggle"
                 />
@@ -41,40 +37,27 @@ export default function MainLayout({
                       <HeaderContent />
                     </div>
                     <div>
-                      <AdminHeaderIcon />
+                      <HeaderIcon />
                     </div>
                     <div>
-                      <label htmlFor="adminMenu" className="drawer-button">
+                      <label htmlFor="mainMenu" className="drawer-button">
                         <ListIcon size={40} weight="regular" />
                       </label>
                     </div>
                   </header>
-                  <main className="container" id="admin-container">
+                  <main className="container" id="main-container">
                     {children}
                   </main>
                   <footer></footer>
                 </div>
                 <div className="drawer-side">
                   <label
-                    htmlFor="adminMenu"
+                    htmlFor="mainMenu"
                     aria-label="close sidebar"
                     className="drawer-overlay"
                   ></label>
                   <ul className="menu bg-base-200 text-base-content min-h-full w-auto p-4">
-                    <li className="admin-menu-header">
-                      <MenuClose />
-                      <ThemeToggle />
-                    </li>
                     <MenuItems />
-                    <li>
-                      <Link id="settings-link" href="/settings">
-                        <GearIcon size={30} weight="thin" />
-                        <span>settings</span>
-                      </Link>
-                    </li>
-                    <li>
-                      <LogoutButton />
-                    </li>
                   </ul>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import PracticeChart from './PracticeChart';
-import type { PracticeType } from '@/app/types/admin';
+import type { PracticeType } from '@/app/types/index';
 
 interface DayData {
   date: string;

@@ -1,8 +1,7 @@
 "use client";
 
-import type { LayoutRuleset } from "@/app/types/layoutRuleset";
+import type { LayoutRuleset, Todo, Project } from "@/app/types/index";
 import type { TransformedLayout } from "@/app/lib/layoutTransformers";
-import type { Todo, Project } from "@/app/types/admin";
 import RecurringSeparateLayout from "./layouts/RecurringSeparateLayout";
 import RecurringSeparateWorldLayout from "./layouts/RecurringSeparateWorldLayout";
 import WorldLayout from "./layouts/WorldLayout";

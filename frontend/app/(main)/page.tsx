@@ -2,11 +2,11 @@
 
 import FaviconManager from "@/app/components/FaviconManager";
 
-export default function AdminPage() {
+export default function HomePage() {
   return (
     <>
       <FaviconManager type="bird" />
-      <main id="admin-home">
+      <main id="container-home">
       </main>
     </>
   );

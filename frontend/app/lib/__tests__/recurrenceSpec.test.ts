@@ -6,7 +6,7 @@ import {
   getOffsetSupportedTypes,
   RECURRENCE_SPECS
 } from '../recurrenceSpec';
-import type { Todo } from '@/app/types/admin';
+import type { Todo } from '@/app/types/index';
 
 // Helper to create minimal todo for testing
 function createTodo(overrides: Partial<Todo>): Todo {

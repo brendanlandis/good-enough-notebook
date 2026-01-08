@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { PracticeLog, StrapiBlock } from '@/app/types/admin';
+import type { PracticeLog, StrapiBlock } from '@/app/types/index';
 import RichTextEditor from '@/app/components/RichTextEditor';
 
 interface PracticeFormProps {

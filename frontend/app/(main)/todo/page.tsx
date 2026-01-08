@@ -6,7 +6,7 @@ import TodoForm from "./components/TodoForm";
 import ProjectForm from "./components/ProjectForm";
 import LayoutRenderer from "./components/LayoutRenderer";
 import RecentStats from "./components/RecentStats";
-import type { Project, Todo, TodoCategory } from "@/app/types/admin";
+import type { Project, Todo, TodoCategory } from "@/app/types/index";
 import {
   getTodayInEST,
   getTodayForRecurrence,
@@ -21,14 +21,14 @@ import {
   type RawTodoData,
   type TodoGroup,
 } from "@/app/lib/layoutTransformers";
-import { getPresetById, getDefaultPreset } from "@/app/types/layoutRuleset";
+import { getPresetById, getDefaultPreset } from "@/app/lib/layoutPresets";
 import { useLayoutRuleset } from "@/app/contexts/LayoutRulesetContext";
 import { useTodoActions } from "@/app/contexts/TodoActionsContext";
 import { useTimezoneContext } from "@/app/contexts/TimezoneContext";
 import FaviconManager from "@/app/components/FaviconManager";
 import { createTodosFromShows } from "@/app/lib/showsTodoCreator";
 
-export default function AdminDashboard() {
+export default function TodoPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [categoryGroups, setCategoryGroups] = useState<TodoGroup[]>([]);
   const [incidentals, setIncidentals] = useState<Todo[]>([]);
@@ -1076,7 +1076,7 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div id="admin-home" className={layoutClass} suppressHydrationWarning>
+      <div id="container-todo" className={layoutClass} suppressHydrationWarning>
         <p>loading...</p>
       </div>
     );
@@ -1084,7 +1084,7 @@ export default function AdminDashboard() {
 
   if (error) {
     return (
-      <div id="admin-home" className={layoutClass} suppressHydrationWarning>
+      <div id="container-todo" className={layoutClass} suppressHydrationWarning>
         <p>error: {error}</p>
       </div>
     );
@@ -1101,7 +1101,7 @@ export default function AdminDashboard() {
   return (
     <>
       <FaviconManager type="broom" />
-      <div id="admin-home" className={layoutClass} suppressHydrationWarning>
+      <div id="container-todo" className={layoutClass} suppressHydrationWarning>
         {!hasAnyTodos && !hasRecurringTodos && !hasCompletedTodos ? (
           <p>nothin' to do, nowhere to be</p>
         ) : (

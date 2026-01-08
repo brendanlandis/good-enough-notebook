@@ -1,5 +1,5 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import type { PracticeType } from '@/app/types/admin';
+import type { PracticeType } from '@/app/types/index';
 
 interface DayData {
   date: string;

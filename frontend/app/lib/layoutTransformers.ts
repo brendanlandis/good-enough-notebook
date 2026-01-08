@@ -1,5 +1,4 @@
-import type { Project, Todo, TodoCategory, World } from "@/app/types/admin";
-import type { LayoutRuleset } from "@/app/types/layoutRuleset";
+import type { Project, Todo, TodoCategory, World, LayoutRuleset } from "@/app/types/index";
 import { getTodayInEST, parseInEST, formatInEST, toISODateInEST, toZonedTime } from "@/app/lib/dateUtils";
 import { getTimezone } from "@/app/lib/timezoneConfig";
 import { getDayBoundaryHour } from "@/app/lib/dayBoundaryConfig";
@@ -1442,7 +1441,7 @@ export function transformLayout(data: RawTodoData, ruleset: LayoutRuleset): Tran
 
     // Create sections for each date, sorted by date descending (most recent first)
     // Filter to only include dates within the last 30 days
-    const dateSections: TodoGroup[] = Array.from(todosByDate.entries())
+    const dateSections = Array.from(todosByDate.entries())
       .filter(([dateKey]) => {
         // Only include dates that are >= 30 days ago
         return dateKey >= cutoffDateISO;

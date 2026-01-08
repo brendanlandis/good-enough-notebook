@@ -22,7 +22,7 @@ export default function TodoActionsDrawer() {
       ></div>
       {showContent && (
         <div className="actions-drawer bg-base-200 text-base-content min-h-full p-4">
-          <div className="admin-menu-header mb-4">
+          <div className="main-menu-header mb-4">
             <button onClick={closeDrawer}>
               <XIcon size={40} weight="regular" />
             </button>

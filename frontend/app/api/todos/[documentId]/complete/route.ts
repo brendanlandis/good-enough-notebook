@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { calculateNextRecurrence } from '@/app/lib/recurrence';
-import type { Todo } from '@/app/types/admin';
+import type { Todo } from '@/app/types/index';
 import { getISOTimestampInEST } from '@/app/lib/dateUtils';
 
 const STRAPI_API_URL = process.env.STRAPI_API_URL;

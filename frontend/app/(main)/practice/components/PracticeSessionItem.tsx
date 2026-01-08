@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PencilIcon, TrashIcon } from "@phosphor-icons/react";
-import type { PracticeLog } from "@/app/types/admin";
+import type { PracticeLog } from "@/app/types/index";
 import { formatInEST } from "@/app/lib/dateUtils";
 import PracticeForm from "./PracticeForm";
 import RichTextDisplay from "@/app/components/RichTextDisplay";

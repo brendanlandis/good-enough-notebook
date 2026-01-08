@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { Todo } from '@/app/types/admin';
+import type { Todo } from '@/app/types/index';
 import { toZonedTime } from 'date-fns-tz';
 import { format as formatTz } from 'date-fns-tz';
 import { addDays } from 'date-fns';

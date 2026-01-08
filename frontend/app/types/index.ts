@@ -204,3 +204,26 @@ export type PracticeLogResponse = StrapiResponse<PracticeLog>;
 export type NotesResponse = StrapiResponse<Note[]>;
 export type NoteResponse = StrapiResponse<Note>;
 
+// Layout Ruleset interface  
+export interface LayoutRuleset {
+  id: string;
+  name: string;
+  showRecurring: boolean;
+  showNonRecurring: boolean;
+  visibleWorlds: World[] | null; // null = show all worlds
+  visibleCategories: TodoCategory[] | null; // null = show all categories
+  sortBy: "alphabetical" | "creationDate" | "dueDate" | "completedAt";
+  groupBy: "recurring-separate" | "recurring-separate-world" | "merged" | "single-section" | "world" | "project" | "category" | "good-morning" | "roulette" | "stuff" | "later" | "done" | "chores";
+}
+
+// Layout Ruleset interface
+export interface LayoutRuleset {
+  id: string;
+  name: string;
+  showRecurring: boolean;
+  showNonRecurring: boolean;
+  visibleWorlds: World[] | null; // null = show all worlds
+  visibleCategories: TodoCategory[] | null; // null = show all categories
+  sortBy: "alphabetical" | "creationDate" | "dueDate" | "completedAt";
+  groupBy: "recurring-separate" | "recurring-separate-world" | "merged" | "single-section" | "world" | "project" | "category" | "good-morning" | "roulette" | "stuff" | "later" | "done" | "chores";
+}

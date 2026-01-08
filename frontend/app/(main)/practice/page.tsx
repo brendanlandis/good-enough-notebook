@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { usePractice } from "@/app/contexts/PracticeContext";
 import { PlayIcon, StopIcon } from "@phosphor-icons/react";
-import type { PracticeLog, StrapiBlock } from "@/app/types/admin";
+import type { PracticeLog, StrapiBlock } from "@/app/types/index";
 import PracticeTimer from "./components/PracticeTimer";
 import PracticeSessionItem from "./components/PracticeSessionItem";
 import RichTextEditor from "@/app/components/RichTextEditor";
@@ -218,12 +218,12 @@ export default function PracticePage() {
   }, []);
 
   if (loading) {
-    return <main id="admin-practice"></main>;
+    return <main id="container-practice"></main>;
   }
 
   if (error) {
     return (
-      <main id="admin-practice">
+      <main id="container-practice">
         <p>error: {error}</p>
       </main>
     );
@@ -242,7 +242,7 @@ export default function PracticePage() {
   return (
     <>
       <FaviconManager type="metronome" />
-      <main id="admin-practice">
+      <main id="container-practice">
         <div className="practice-controls">
           {activeSession ? (
             <div className="active-session">

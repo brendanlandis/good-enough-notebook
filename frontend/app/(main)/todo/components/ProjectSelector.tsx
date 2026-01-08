@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Project, World, TodoCategory } from "@/app/types/admin";
+import type { Project, World, TodoCategory } from "@/app/types/index";
 
 interface ProjectSelectorProps {
   value: string | null;

@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState, useEffect } from "react";
 import ProjectSelector from "./ProjectSelector";
-import type { Todo, RecurrenceType, TodoCategory, StrapiBlock } from "@/app/types/admin";
+import type { Todo, RecurrenceType, TodoCategory, StrapiBlock } from "@/app/types/index";
 import { getNowInEST, toISODateInEST } from "@/app/lib/dateUtils";
 import { calculateNextRecurrence } from "@/app/lib/recurrence";
 import RichTextEditor from "@/app/components/RichTextEditor";

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTodayForRecurrence, toISODateInEST } from '@/app/lib/dateUtils';
-import type { PracticeType } from '@/app/types/admin';
+import type { PracticeType } from '@/app/types/index';
 
 const STRAPI_API_URL = process.env.STRAPI_API_URL;
 

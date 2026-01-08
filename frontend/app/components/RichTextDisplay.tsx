@@ -1,7 +1,7 @@
 'use client';
 
 import { BlocksRenderer } from '@strapi/blocks-react-renderer';
-import type { StrapiBlock } from '@/app/types/admin';
+import type { StrapiBlock } from '@/app/types/index';
 
 interface RichTextDisplayProps {
   content: StrapiBlock[];

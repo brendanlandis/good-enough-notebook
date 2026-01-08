@@ -1,4 +1,5 @@
-import { LAYOUT_PRESETS, type LayoutRuleset } from "@/app/types/layoutRuleset";
+import { LAYOUT_PRESETS } from "@/app/lib/layoutPresets";
+import type { LayoutRuleset } from "@/app/types/index";
 
 interface LayoutSelectorProps {
   value: string; // preset ID

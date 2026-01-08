@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { Todo } from '@/app/types/admin';
+import type { Todo } from '@/app/types/index';
 
 const STRAPI_API_URL = process.env.STRAPI_API_URL;
 

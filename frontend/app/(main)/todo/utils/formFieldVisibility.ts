@@ -1,4 +1,4 @@
-import type { TodoCategory } from "@/app/types/admin";
+import type { TodoCategory } from "@/app/types/index";
 
 /**
  * Helper functions to determine form field visibility based on todo category

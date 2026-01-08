@@ -5,7 +5,7 @@
  * All recurrence calculation code should reference this specification.
  */
 
-import type { RecurrenceType, Todo } from '../types/admin';
+import type { RecurrenceType, Todo } from '../types/index';
 
 /**
  * Calculation modes for different recurrence types

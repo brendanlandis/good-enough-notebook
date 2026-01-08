@@ -9,7 +9,7 @@ import {
   GearIcon
 } from '@phosphor-icons/react';
 
-export default function AdminHeaderIcon() {
+export default function HeaderIcon() {
   const pathname = usePathname();
 
   const iconProps = { size: 40, weight: "regular" as const };

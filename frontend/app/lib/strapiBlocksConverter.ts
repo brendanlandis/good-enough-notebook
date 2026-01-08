@@ -1,4 +1,4 @@
-import type { StrapiBlock, StrapiInlineNode, StrapiParagraphBlock, StrapiListBlock, StrapiHeadingBlock, StrapiQuoteBlock } from '@/app/types/admin';
+import type { StrapiBlock, StrapiInlineNode, StrapiParagraphBlock, StrapiListBlock, StrapiHeadingBlock, StrapiQuoteBlock } from '@/app/types/index';
 import type { JSONContent } from '@tiptap/react';
 
 /**

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { calculateNextRecurrence } from '../recurrence';
-import type { Todo } from '@/app/types/admin';
+import type { Todo } from '@/app/types/index';
 import * as dateUtils from '../dateUtils';
 
 // Mock the date utilities to have consistent test dates

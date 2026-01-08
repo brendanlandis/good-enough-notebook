@@ -5,17 +5,25 @@ import {
   BroomIcon,
   MetronomeIcon,
   PencilIcon,
+  GearIcon,
 } from '@phosphor-icons/react/dist/ssr';
+import MenuClose from './MenuClose';
+import ThemeToggle from './ThemeToggle';
+import LogoutButton from './LogoutButton';
 
 export default function MenuItems() {
   const closeDrawer = () => {
     const drawerCheckbox = document.getElementById(
-      'adminMenu'
+      'mainMenu'
     ) as HTMLInputElement;
     if (drawerCheckbox) drawerCheckbox.checked = false;
   };
   return (
     <>
+      <li className="main-menu-header">
+        <MenuClose />
+        <ThemeToggle />
+      </li>
       <li>
         <Link href="/" onClick={closeDrawer}>
           <BirdIcon size={30} weight="thin" />
@@ -39,6 +47,15 @@ export default function MenuItems() {
           <PencilIcon size={30} weight="thin" />
           <span>notes</span>
         </Link>
+      </li>
+      <li>
+        <Link id="settings-link" href="/settings" onClick={closeDrawer}>
+          <GearIcon size={30} weight="thin" />
+          <span>settings</span>
+        </Link>
+      </li>
+      <li>
+        <LogoutButton />
       </li>
     </>
   );

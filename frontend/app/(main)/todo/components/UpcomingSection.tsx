@@ -1,7 +1,7 @@
 "use client";
 
 import TodoItem from "./TodoItem";
-import type { Todo } from "@/app/types/admin";
+import type { Todo } from "@/app/types/index";
 
 interface TodoGroup {
   title: string;

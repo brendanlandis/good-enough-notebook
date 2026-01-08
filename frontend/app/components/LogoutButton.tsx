@@ -8,7 +8,7 @@ export default function LogoutButton() {
   const pathname = usePathname();
 
   // Hide logout button on login page
-  if (pathname === '/admin/login') {
+  if (pathname === '/login') {
     return null;
   }
 
@@ -19,7 +19,7 @@ export default function LogoutButton() {
       });
 
       if (response.ok) {
-        router.push('/admin/login');
+        router.push('/login');
       }
     } catch (error) {
       console.error('Logout error:', error);

@@ -9,13 +9,13 @@ export default function EscapeKeyHandler() {
   // Close all drawers on page load to prevent blank drawers after reload
   useEffect(() => {
     const todoActionsCheckbox = document.getElementById('todoActionsDrawer') as HTMLInputElement;
-    const adminMenuCheckbox = document.getElementById('adminMenu') as HTMLInputElement;
+    const mainMenuCheckbox = document.getElementById('mainMenu') as HTMLInputElement;
     
     if (todoActionsCheckbox) {
       todoActionsCheckbox.checked = false;
     }
-    if (adminMenuCheckbox) {
-      adminMenuCheckbox.checked = false;
+    if (mainMenuCheckbox) {
+      mainMenuCheckbox.checked = false;
     }
   }, []); // Run once on mount
 
@@ -26,15 +26,15 @@ export default function EscapeKeyHandler() {
         const todoActionsCheckbox = document.getElementById('todoActionsDrawer') as HTMLInputElement;
         const isTodoActionsOpen = todoActionsCheckbox?.checked;
 
-        // Check if admin menu is open (right drawer)
-        const adminMenuCheckbox = document.getElementById('adminMenu') as HTMLInputElement;
-        const isAdminMenuOpen = adminMenuCheckbox?.checked;
+        // Check if main menu is open (right drawer)
+        const mainMenuCheckbox = document.getElementById('mainMenu') as HTMLInputElement;
+        const isMainMenuOpen = mainMenuCheckbox?.checked;
 
         // Close whichever drawer is open
         if (isTodoActionsOpen) {
           closeDrawer();
-        } else if (isAdminMenuOpen) {
-          adminMenuCheckbox.checked = false;
+        } else if (isMainMenuOpen) {
+          mainMenuCheckbox.checked = false;
         }
       }
     };

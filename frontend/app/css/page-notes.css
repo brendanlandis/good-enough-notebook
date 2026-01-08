@@ -1,4 +1,4 @@
-main:has(#admin-notes) {
+main:has(#container-notes) {
   text-align: center;
 }
 

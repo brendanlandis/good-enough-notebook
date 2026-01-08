@@ -1,4 +1,4 @@
-import type { Todo, Project } from "@/app/types/admin";
+import type { Todo, Project } from "@/app/types/index";
 import type { TransformedLayout } from "@/app/lib/layoutTransformers";
 
 export interface LayoutRendererProps {

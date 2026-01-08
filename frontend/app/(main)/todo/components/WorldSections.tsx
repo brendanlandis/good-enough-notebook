@@ -1,7 +1,7 @@
 "use client";
 
 import TodoSections from "./TodoSections";
-import type { Project, Todo, World } from "@/app/types/admin";
+import type { Project, Todo, World } from "@/app/types/index";
 
 interface TodoGroup {
   title: string;
