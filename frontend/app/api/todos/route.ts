@@ -94,6 +94,87 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Fetch recently completed todos to allow them to remain visible for the configured duration
+    // This enables the "completed task visibility window" feature
+    const visibilitySettingResponse = await fetch(
+      `${req.nextUrl.origin}/api/system-settings?title=completedTaskVisibilityMinutes`,
+      {
+        headers: {
+          Cookie: req.headers.get('cookie') || '',
+        },
+      }
+    );
+
+    let visibilityMinutes = 15; // Default
+    if (visibilitySettingResponse.ok) {
+      const visibilityData = await visibilitySettingResponse.json();
+      if (visibilityData.success && visibilityData.value) {
+        const parsed = parseInt(visibilityData.value, 10);
+        if (!isNaN(parsed) && parsed >= 0) {
+          visibilityMinutes = parsed;
+        }
+      } else if (!visibilityData.value) {
+        // Setting doesn't exist, create it with default value
+        try {
+          await fetch(`${req.nextUrl.origin}/api/system-settings`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Cookie: req.headers.get('cookie') || '',
+            },
+            body: JSON.stringify({
+              title: 'completedTaskVisibilityMinutes',
+              value: '15',
+            }),
+          });
+        } catch (e) {
+          // Non-fatal error, just log it
+          console.error('Failed to create completedTaskVisibilityMinutes setting:', e);
+        }
+      }
+    }
+
+    // Calculate the cutoff time for recently completed todos
+    const now = new Date();
+    const cutoffTime = new Date(now.getTime() - visibilityMinutes * 60 * 1000);
+    const cutoffISO = cutoffTime.toISOString();
+
+    // Fetch recently completed todos
+    page = 1;
+    hasMore = true;
+    let recentlyCompletedTodos: any[] = [];
+
+    while (hasMore) {
+      const response = await fetch(
+        `${STRAPI_API_URL}/api/todos?filters[completed][$eq]=true&filters[completedAt][$gte]=${cutoffISO}&pLevel=2&pagination[pageSize]=100&pagination[page]=${page}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        // Don't fail the whole request if completed todos can't be fetched
+        console.error('Failed to fetch recently completed todos');
+        break;
+      }
+
+      const data = await response.json();
+      recentlyCompletedTodos = recentlyCompletedTodos.concat(data.data);
+
+      // Check if there are more pages
+      const pagination = data.meta?.pagination;
+      if (pagination && page < pagination.pageCount) {
+        page++;
+      } else {
+        hasMore = false;
+      }
+    }
+
+    // Combine incomplete and recently completed todos
+    allTodos = allTodos.concat(recentlyCompletedTodos);
+
     return NextResponse.json({
       success: true,
       data: allTodos,

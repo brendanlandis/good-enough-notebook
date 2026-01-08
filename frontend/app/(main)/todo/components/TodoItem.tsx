@@ -153,11 +153,6 @@ export default function TodoItem({
           </button>
         )}
         <label htmlFor={`todo-${todo.documentId}`}>
-          {!isWorkedOnEntry && todo.completed && todo.completedAt && (
-            <span className="todo-completed-time">
-              {formatCompletedTime(todo.completedAt)}{" "}
-            </span>
-          )}
           {isWorkedOnEntry && todo.completedAt && (
             <span className="todo-completed-time">
               {formatCompletedTime(todo.completedAt)}{" "}
