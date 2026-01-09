@@ -39,44 +39,6 @@ interface MoonPhaseIconProps {
   className?: string;
 }
 
-/**
- * Convert moon phase icon name to lowercase, human-readable string
- */
-function getMoonPhaseTitle(iconName: MoonPhaseIconName): string {
-  const titleMap: Record<MoonPhaseIconName, string> = {
-    WiMoonNew: 'new moon',
-    WiMoonWaxingCrescent1: 'waxing crescent',
-    WiMoonWaxingCrescent2: 'waxing crescent',
-    WiMoonWaxingCrescent3: 'waxing crescent',
-    WiMoonWaxingCrescent4: 'waxing crescent',
-    WiMoonWaxingCrescent5: 'waxing crescent',
-    WiMoonWaxingCrescent6: 'waxing crescent',
-    WiMoonFirstQuarter: 'first quarter',
-    WiMoonWaxingGibbous1: 'waxing gibbous',
-    WiMoonWaxingGibbous2: 'waxing gibbous',
-    WiMoonWaxingGibbous3: 'waxing gibbous',
-    WiMoonWaxingGibbous4: 'waxing gibbous',
-    WiMoonWaxingGibbous5: 'waxing gibbous',
-    WiMoonWaxingGibbous6: 'waxing gibbous',
-    WiMoonFull: 'full moon',
-    WiMoonWaningGibbous1: 'waning gibbous',
-    WiMoonWaningGibbous2: 'waning gibbous',
-    WiMoonWaningGibbous3: 'waning gibbous',
-    WiMoonWaningGibbous4: 'waning gibbous',
-    WiMoonWaningGibbous5: 'waning gibbous',
-    WiMoonWaningGibbous6: 'waning gibbous',
-    WiMoonThirdQuarter: 'third quarter',
-    WiMoonWaningCrescent1: 'waning crescent',
-    WiMoonWaningCrescent2: 'waning crescent',
-    WiMoonWaningCrescent3: 'waning crescent',
-    WiMoonWaningCrescent4: 'waning crescent',
-    WiMoonWaningCrescent5: 'waning crescent',
-    WiMoonWaningCrescent6: 'waning crescent',
-  };
-  
-  return titleMap[iconName] || 'new moon';
-}
-
 // Map component names to actual components
 const moonPhaseComponents: Record<MoonPhaseIconName, React.ComponentType<{ size?: number; className?: string }>> = {
   WiMoonNew: MoonNew,
@@ -126,7 +88,6 @@ export default function MoonPhaseIcon({ size = 25, className }: MoonPhaseIconPro
   }, [timezone, isLoaded]);
 
   const IconComponent = moonPhaseComponents[iconName];
-  const title = getMoonPhaseTitle(iconName);
 
   if (!IconComponent) {
     // Fallback to new moon if component not found
@@ -138,7 +99,7 @@ export default function MoonPhaseIcon({ size = 25, className }: MoonPhaseIconPro
   }
 
   return (
-    <span title={title}>
+    <span>
       <IconComponent size={size} className={className} key={iconName} />
     </span>
   );

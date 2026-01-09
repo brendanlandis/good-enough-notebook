@@ -11,7 +11,8 @@ import MoonPhaseIcon from "./MoonPhaseIcon";
 
 export default function HeaderContent() {
   const pathname = usePathname();
-  const { selectedRulesetId, setSelectedRulesetId, isHydrated } = useLayoutRuleset();
+  const { selectedRulesetId, setSelectedRulesetId, isHydrated } =
+    useLayoutRuleset();
   const { selectedPracticeType, setSelectedPracticeType } = usePractice();
   const { openTodoForm, openProjectForm, openNoteForm } = useTodoActions();
 
@@ -45,16 +46,27 @@ export default function HeaderContent() {
             onChange={setSelectedRulesetId}
           />
         )}
-        <button onClick={openTodoForm}>
+        <button
+          onClick={openTodoForm}
+          className="tooltip tooltip-bottom"
+          data-tip="add todo"
+        >
           <PlusCircleIcon size={25} />
         </button>
-        <button onClick={openProjectForm}>
+        <button
+          onClick={openProjectForm}
+          className="tooltip tooltip-bottom"
+          data-tip="add project"
+        >
           <FolderSimplePlusIcon size={25} />
         </button>
-        <button className="moon-phase-icon" onClick={handleResetMoonPhase}>
+        <button
+          className="moon-phase-icon tooltip tooltip-bottom"
+          data-tip="declutter"
+          onClick={handleResetMoonPhase}
+        >
           <MoonPhaseIcon size={25} />
         </button>
-        
       </>
     );
   }
