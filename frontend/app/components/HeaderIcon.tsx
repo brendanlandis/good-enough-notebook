@@ -12,7 +12,7 @@ import {
 export default function HeaderIcon() {
   const pathname = usePathname();
 
-  const iconProps = { size: 40, weight: "regular" as const };
+  const iconProps = { size: 40, weight: "duotone" as const };
 
   // Practice page
   if (pathname === '/practice') {

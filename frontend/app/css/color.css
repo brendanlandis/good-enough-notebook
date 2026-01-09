@@ -18,6 +18,10 @@
     background: var(--primary-color);
     color: var(--background);
   }
+
+  .header-icon {
+    color: var(--color-success);
+  }
 }
 
 html[data-theme="dim"] {
@@ -40,6 +44,10 @@ html[data-theme="dim"] {
   .moon-phase-icon svg {
     background: transparent;
     color: var(--primary-color);
+  }
+
+  .header-icon {
+    color: var(--color-primary);
   }
 }
 

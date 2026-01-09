@@ -34,10 +34,10 @@ export default function MainLayout({
                 <div className="drawer-content">
                   <header>
                     <div>
+                      <div className="header-icon">
+                        <HeaderIcon />
+                      </div>
                       <HeaderContent />
-                    </div>
-                    <div>
-                      <HeaderIcon />
                     </div>
                     <div>
                       <label htmlFor="mainMenu" className="drawer-button">
@@ -69,4 +69,3 @@ export default function MainLayout({
     </LayoutRulesetProvider>
   );
 }
-
