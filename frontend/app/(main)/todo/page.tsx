@@ -37,6 +37,12 @@ export default function TodoPage() {
     TodoGroup[]
   >([]);
   const [recurringIncidentals, setRecurringIncidentals] = useState<Todo[]>([]);
+  // Unfiltered recurring data (includes tasks that haven't reached displayDate yet)
+  const [allRecurringProjects, setAllRecurringProjects] = useState<Project[]>([]);
+  const [allRecurringCategoryGroups, setAllRecurringCategoryGroups] = useState<
+    TodoGroup[]
+  >([]);
+  const [allRecurringIncidentals, setAllRecurringIncidentals] = useState<Todo[]>([]);
   const [completedTodos, setCompletedTodos] = useState<Todo[]>([]);
   const [upcomingTodos, setUpcomingTodos] = useState<Todo[]>([]);
   const [longTodosWithSessions, setLongTodosWithSessions] = useState<Todo[]>(
@@ -163,8 +169,10 @@ export default function TodoPage() {
         });
 
         // Separate recurring and non-recurring todos
-        // Only show recurring todos whose display date has arrived
-
+        // Keep both filtered and unfiltered recurring todos
+        const allRecurringTodosUnfiltered = visibleTodos.filter((todo: Todo) => todo.isRecurring);
+        
+        // Only show recurring todos whose display date has arrived (for most views)
         const recurringTodos = visibleTodos.filter((todo: Todo) => {
           if (!todo.isRecurring) return false;
           if (!todo.displayDate) return true; // Show if no date set (legacy)
@@ -258,12 +266,56 @@ export default function TodoPage() {
           todos,
         }));
 
+        // Process ALL recurring todos (unfiltered by displayDate) for recurring-review view
+        const allRecurringProjectMap = new Map<string, Project>();
+        const allRecurringTodosWithoutProjects: Todo[] = [];
+
+        allRecurringTodosUnfiltered.forEach((todo: Todo) => {
+          if (todo.project) {
+            const project = todo.project as any;
+            if (!allRecurringProjectMap.has(project.documentId)) {
+              allRecurringProjectMap.set(project.documentId, {
+                ...project,
+                todos: [],
+              });
+            }
+            allRecurringProjectMap.get(project.documentId)!.todos!.push(todo);
+          } else {
+            allRecurringTodosWithoutProjects.push(todo);
+          }
+        });
+
+        const allRecurringCategoryMap = new Map<TodoCategory, Todo[]>();
+        const allRecurringIncidentalTodos: Todo[] = [];
+
+        allRecurringTodosWithoutProjects.forEach((todo: Todo) => {
+          if (todo.category) {
+            if (!allRecurringCategoryMap.has(todo.category)) {
+              allRecurringCategoryMap.set(todo.category, []);
+            }
+            allRecurringCategoryMap.get(todo.category)!.push(todo);
+          } else {
+            allRecurringIncidentalTodos.push(todo);
+          }
+        });
+
+        const allRecurringProjectsArray = Array.from(allRecurringProjectMap.values());
+        const allRecurringGroups: TodoGroup[] = Array.from(
+          allRecurringCategoryMap.entries()
+        ).map(([category, todos]) => ({
+          title: category,
+          todos,
+        }));
+
         setProjects(projectsArray);
         setCategoryGroups(groups);
         setIncidentals(incidentalTodos);
         setRecurringProjects(recurringProjectsArray);
         setRecurringCategoryGroups(recurringGroups);
         setRecurringIncidentals(recurringIncidentalTodos);
+        setAllRecurringProjects(allRecurringProjectsArray);
+        setAllRecurringCategoryGroups(allRecurringGroups);
+        setAllRecurringIncidentals(allRecurringIncidentalTodos);
       } else {
         setError(result.error);
       }
@@ -1049,13 +1101,15 @@ export default function TodoPage() {
   // Transform layout using selected ruleset
   const transformedData = useMemo(() => {
     const ruleset = getPresetById(selectedRulesetId) || getDefaultPreset();
+    // Use unfiltered recurring data for the recurring-review view
+    const useUnfilteredRecurring = selectedRulesetId === "recurring";
     const rawData: RawTodoData = {
       projects,
       categoryGroups,
       incidentals,
-      recurringProjects,
-      recurringCategoryGroups,
-      recurringIncidentals,
+      recurringProjects: useUnfilteredRecurring ? allRecurringProjects : recurringProjects,
+      recurringCategoryGroups: useUnfilteredRecurring ? allRecurringCategoryGroups : recurringCategoryGroups,
+      recurringIncidentals: useUnfilteredRecurring ? allRecurringIncidentals : recurringIncidentals,
       completedTodos: selectedRulesetId === "done" ? completedTodos : undefined,
       upcomingTodos: selectedRulesetId === "done" ? upcomingTodos : undefined,
       longTodosWithSessions:
@@ -1070,6 +1124,9 @@ export default function TodoPage() {
     incidentals,
     recurringProjects,
     recurringCategoryGroups,
+    allRecurringProjects,
+    allRecurringCategoryGroups,
+    allRecurringIncidentals,
     recurringIncidentals,
     completedTodos,
     upcomingTodos,

@@ -1,4 +1,4 @@
-import type { Project, Todo, TodoCategory, World, LayoutRuleset } from "@/app/types/index";
+import type { Project, Todo, TodoCategory, World, LayoutRuleset, RecurrenceType } from "@/app/types/index";
 import { getTodayInEST, parseInEST, formatInEST, toISODateInEST, toZonedTime } from "@/app/lib/dateUtils";
 import { getTimezone } from "@/app/lib/timezoneConfig";
 import { getDayBoundaryHour } from "@/app/lib/dayBoundaryConfig";
@@ -32,6 +32,8 @@ export interface TransformedLayout {
   nonRecurringNoProjectIncidentals?: Todo[];
   rouletteTodos?: Todo[];
   upcomingTodosByDay?: TodoGroup[];
+  recurringReviewSections?: Map<RecurrenceType, Section[]>;
+  recurringReviewIncidentals?: Map<RecurrenceType, Todo[]>;
 }
 
 export interface RawTodoData {
@@ -262,7 +264,145 @@ function sortSections(sections: Section[], sortBy: LayoutRuleset["sortBy"]): Sec
 
 // Main transformation function
 export function transformLayout(data: RawTodoData, ruleset: LayoutRuleset): TransformedLayout {
-  // Filter and prepare data
+  // For recurring-review, skip the filtering and use the raw data directly
+  if (ruleset.groupBy === "recurring-review") {
+    // Collect ALL incomplete recurring tasks (ignore any filtering)
+    const allRecurringTodos: Todo[] = [];
+    
+    // Collect from recurring projects
+    data.recurringProjects.forEach((project) => {
+      if ("documentId" in project && project.todos) {
+        project.todos.forEach((todo) => {
+          if (!todo.completed) {
+            allRecurringTodos.push(todo);
+          }
+        });
+      }
+    });
+    
+    // Collect from recurring category groups
+    data.recurringCategoryGroups.forEach((group) => {
+      if (group.todos) {
+        group.todos.forEach((todo) => {
+          if (!todo.completed) {
+            allRecurringTodos.push(todo);
+          }
+        });
+      }
+    });
+    
+    // Collect recurring incidentals
+    data.recurringIncidentals.forEach((todo) => {
+      if (!todo.completed) {
+        allRecurringTodos.push(todo);
+      }
+    });
+    
+    // Group by recurrence type
+    const todosByRecurrenceType = new Map<RecurrenceType, Todo[]>();
+    allRecurringTodos.forEach((todo) => {
+      if (!todosByRecurrenceType.has(todo.recurrenceType)) {
+        todosByRecurrenceType.set(todo.recurrenceType, []);
+      }
+      todosByRecurrenceType.get(todo.recurrenceType)!.push(todo);
+    });
+    
+    // Define the order of recurrence types
+    const recurrenceTypeOrder: RecurrenceType[] = [
+      "daily",
+      "every x days",
+      "weekly",
+      "biweekly",
+      "monthly date",
+      "monthly day",
+      "annually",
+      "full moon",
+      "new moon",
+      "every season",
+      "winter solstice",
+      "spring equinox",
+      "summer solstice",
+      "autumn equinox",
+    ];
+    
+    // For each recurrence type, organize todos by project, category, then incidentals
+    const recurringReviewSectionsMap = new Map<RecurrenceType, Section[]>();
+    const recurringReviewIncidentalsMap = new Map<RecurrenceType, Todo[]>();
+    
+    recurrenceTypeOrder.forEach((recurrenceType) => {
+      const todosForType = todosByRecurrenceType.get(recurrenceType);
+      if (!todosForType || todosForType.length === 0) return;
+      
+      // Group by project
+      const projectMap = new Map<string, Project>();
+      const todosWithoutProjects: Todo[] = [];
+      
+      todosForType.forEach((todo) => {
+        if (todo.project) {
+          const project = todo.project as any;
+          if (!projectMap.has(project.documentId)) {
+            projectMap.set(project.documentId, {
+              ...project,
+              todos: [],
+            });
+          }
+          projectMap.get(project.documentId)!.todos!.push(todo);
+        } else {
+          todosWithoutProjects.push(todo);
+        }
+      });
+      
+      // Group todos without projects by category
+      const categoryMap = new Map<TodoCategory, Todo[]>();
+      const incidentalTodos: Todo[] = [];
+      
+      todosWithoutProjects.forEach((todo) => {
+        if (todo.category) {
+          if (!categoryMap.has(todo.category)) {
+            categoryMap.set(todo.category, []);
+          }
+          categoryMap.get(todo.category)!.push(todo);
+        } else {
+          incidentalTodos.push(todo);
+        }
+      });
+      
+      // Sort projects alphabetically
+      const projectsArray = Array.from(projectMap.values());
+      const sortedProjects = projectsArray.map((project) => ({
+        ...project,
+        todos: sortTodos(project.todos || [], "alphabetical"),
+      })).sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
+      
+      // Sort categories alphabetically
+      const categoriesArray = Array.from(categoryMap.entries()).map(([category, todos]) => ({
+        title: category,
+        todos: sortTodos(todos, "alphabetical"),
+      })).sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
+      
+      // Combine: projects first, then categories
+      const sections: Section[] = [...sortedProjects, ...categoriesArray];
+      
+      // Sort incidentals alphabetically
+      const sortedIncidentals = sortTodos(incidentalTodos, "alphabetical");
+      
+      // Only add to maps if there's content
+      if (sections.length > 0) {
+        recurringReviewSectionsMap.set(recurrenceType, sections);
+      }
+      if (sortedIncidentals.length > 0) {
+        recurringReviewIncidentalsMap.set(recurrenceType, sortedIncidentals);
+      }
+    });
+    
+    // Return the maps even if empty (for consistency with tests)
+    return {
+      recurringReviewSections: recurringReviewSectionsMap,
+      recurringReviewIncidentals: recurringReviewIncidentalsMap.size > 0 ? recurringReviewIncidentalsMap : undefined,
+    };
+  }
+
+  // Filter and prepare data for all other views
   const filteredRecurringProjects = data.recurringProjects
     .map((project) => filterSectionTodos(project, ruleset, getTodoWorld))
     .filter((section): section is Section => section !== null);

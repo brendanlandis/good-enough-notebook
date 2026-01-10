@@ -11,6 +11,7 @@ import DefaultLayout from "./layouts/DefaultLayout";
 import RouletteLayout from "./layouts/RouletteLayout";
 import StuffLayout from "./layouts/StuffLayout";
 import ChoresLayout from "./layouts/ChoresLayout";
+import RecurringReviewLayout from "./layouts/RecurringReviewLayout";
 import type { LayoutRendererProps } from "./layouts/types";
 
 interface LayoutRendererComponentProps {
@@ -41,6 +42,7 @@ const LAYOUT_COMPONENTS: Record<string, React.ComponentType<LayoutRendererProps>
   "later": DefaultLayout,
   "chores": ChoresLayout,
   "done": SingleSectionLayout,
+  "recurring-review": RecurringReviewLayout,
 };
 
 export default function LayoutRenderer({

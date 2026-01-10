@@ -122,6 +122,16 @@ export const LAYOUT_PRESETS: LayoutRuleset[] = [
     sortBy: "completedAt",
     groupBy: "done",
   },
+  {
+    id: "recurring",
+    name: "recurring",
+    showRecurring: true,
+    showNonRecurring: false,
+    visibleWorlds: null,
+    visibleCategories: null,
+    sortBy: "alphabetical",
+    groupBy: "recurring-review",
+  },
 ];
 
 // Helper function to get a preset by ID

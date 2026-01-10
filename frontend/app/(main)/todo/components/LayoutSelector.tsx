@@ -19,7 +19,7 @@ export default function LayoutSelector({ value, onChange }: LayoutSelectorProps)
     return indexA - indexB;
   });
   const byWorldPresets = LAYOUT_PRESETS.filter((preset) => preset.groupBy === "world");
-  const postMortemPresets = LAYOUT_PRESETS.filter((preset) => preset.id === "done");
+  const reviewPresets = LAYOUT_PRESETS.filter((preset) => preset.id === "done" || preset.id === "recurring");
 
   return (
     <select
@@ -40,8 +40,8 @@ export default function LayoutSelector({ value, onChange }: LayoutSelectorProps)
           </option>
         ))}
       </optgroup>
-      <optgroup label="post mortem">
-        {postMortemPresets.map((preset) => (
+      <optgroup label="review">
+        {reviewPresets.map((preset) => (
           <option key={preset.id} value={preset.id}>
             {preset.name}
           </option>
