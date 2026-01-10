@@ -10,9 +10,7 @@ function getRecurrenceTypeLabel(recurrenceType: RecurrenceType, todos: any[]): s
     case "daily":
       return "every day";
     case "every x days":
-      // Get the interval from the first todo if available
-      const interval = todos[0]?.recurrenceInterval;
-      return interval ? `every ${interval} days` : "every x days";
+      return "every x days";
     case "weekly":
       return "weekly";
     case "biweekly":

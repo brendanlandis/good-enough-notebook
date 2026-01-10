@@ -114,7 +114,8 @@
     overflow-wrap: break-word;
     word-break: break-word;
   }
-  .layout-everything & {
+  .layout-everything &,
+  .layout-recurring & {
     grid-row: auto;
     grid-template-rows: none;
   }

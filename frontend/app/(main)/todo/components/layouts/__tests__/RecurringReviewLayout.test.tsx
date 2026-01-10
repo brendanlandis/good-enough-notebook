@@ -172,7 +172,7 @@ describe('RecurringReviewLayout', () => {
 
       render(<RecurringReviewLayout {...props} />);
 
-      expect(screen.getByText('every 3 days')).toBeDefined();
+      expect(screen.getByText('every x days')).toBeDefined();
     });
 
     it('should display "weekly" for weekly recurrence', () => {
