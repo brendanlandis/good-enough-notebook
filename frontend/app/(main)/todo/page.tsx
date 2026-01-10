@@ -135,23 +135,28 @@ export default function TodoPage() {
         const allTodos: Todo[] = result.data;
 
         // Filter out long todos that have been worked on today
-        // Also filter out completed todos that are older than visibility window
+        // Filter out completed todos and worked-on todos that are older than visibility window
         const today = getTodayInEST();
         const now = getNowInEST();
-        // Use day boundary-aware date for checking work sessions
-        const todayForWorkSessions = getTodayForRecurrence();
-        const todayDateString = toISODateInEST(todayForWorkSessions);
         const visibilityMinutes = getCompletedTaskVisibilityMinutes();
         
         const visibleTodos = allTodos.filter((todo: Todo) => {
-          // If it's a long todo and has been worked on today, hide it
-          // "Today" respects the day boundary hour setting
-          if (
-            todo.long &&
-            todo.workSessions &&
-            todo.workSessions.find((ws) => ws.date === todayDateString)
-          ) {
-            return false;
+          // If it's a long todo with recent work sessions, check visibility window
+          if (todo.long && todo.workSessions && todo.workSessions.length > 0) {
+            // Find the most recent work session
+            const mostRecentSession = todo.workSessions
+              .slice()
+              .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+            
+            if (mostRecentSession) {
+              const sessionTime = new Date(mostRecentSession.timestamp);
+              const minutesSinceSession = (now.getTime() - sessionTime.getTime()) / (1000 * 60);
+              
+              if (minutesSinceSession <= visibilityMinutes) {
+                // Recent work session, hide from main list (will show in "done" view)
+                return false;
+              }
+            }
           }
           
           // If it's completed, check if it's within visibility window

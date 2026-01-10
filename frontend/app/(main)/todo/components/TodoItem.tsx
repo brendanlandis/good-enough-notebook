@@ -108,7 +108,7 @@ export default function TodoItem({
   };
 
   return (
-    <li className={isChecked ? 'completed' : ''}>
+    <li className={isWorkedOnEntry ? 'worked-on' : (isChecked ? 'completed' : '')}>
       <div className="todo-item-main">
         <input
           type="checkbox"
