@@ -26,7 +26,25 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="apple-mobile-web-app-title" content="Notebook" />
+        <meta name="apple-mobile-web-app-title" content="common notebook" />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
+        <link rel="manifest" href="/site.webmanifest"></link>
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -69,9 +87,7 @@ export default function RootLayout({
           ${fontChillax.variable}
         `}
       >
-        <TimezoneProvider>
-          {children}
-        </TimezoneProvider>
+        <TimezoneProvider>{children}</TimezoneProvider>
       </body>
     </html>
   );
