@@ -8,11 +8,6 @@
   }
 }
 
-.timezone-select:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .timezone-detect-button {
   display: flex;
   align-items: center;
