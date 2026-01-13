@@ -2,7 +2,7 @@
   text-align: center;
 }
 
-.world-section {
+.group-section {
   text-align: left;
   & + & {
     margin-top: 10rem;

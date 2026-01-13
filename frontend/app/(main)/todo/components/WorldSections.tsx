@@ -74,7 +74,7 @@ export default function WorldSections({
         const hasFirstSection = hasTopOfMindOrCategories || hasIncidentals;
 
         return (
-          <div className="world-section" key={world}>
+          <div className="group-section" key={world}>
             {!hideWorldName && <h2>{world}</h2>}
             
             {/* Top of mind projects and categories */}

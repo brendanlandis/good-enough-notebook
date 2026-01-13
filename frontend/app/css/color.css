@@ -100,7 +100,7 @@ button.btn {
 
 /* various boxes */
 
-.world-section h2 {
+.group-section h2 {
   background: var(--background-light);
   border-color: var(--primary-color-light);
 }
