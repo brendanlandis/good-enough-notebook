@@ -70,6 +70,304 @@ export default function TodoPage() {
     useTodoActions();
   const { timezone } = useTimezoneContext();
 
+  // Helper function to determine world from category
+  const getTodoWorldFromCategory = (category: TodoCategory | null): string => {
+    if (!category) return "life stuff";
+    if (category === "home chores" || category === "life chores") return "life stuff";
+    if (category === "studio chores" || category === "band chores") return "music admin";
+    if (category === "work chores") return "day job";
+    if (category === "web chores" || category === "data chores" || category === "computer chores") return "computer";
+    return "life stuff";
+  };
+
+  // Helper to check if a state change requires full reorganization
+  const hasComplexStateChange = (oldTodo: Todo, newTodo: Todo): boolean => {
+    return (
+      oldTodo.isRecurring !== newTodo.isRecurring ||
+      oldTodo.project?.documentId !== newTodo.project?.documentId ||
+      oldTodo.category !== newTodo.category ||
+      oldTodo.displayDate !== newTodo.displayDate
+    );
+  };
+
+  // Add a todo to the appropriate state arrays
+  const addTodoToState = (todo: Todo) => {
+    const today = getTodayInEST();
+    
+    // Determine if this is a recurring todo that should be visible
+    const isVisibleRecurring = todo.isRecurring && (
+      !todo.displayDate || parseInEST(todo.displayDate) <= today
+    );
+    
+    if (todo.project) {
+      const project = todo.project as any;
+      
+      if (todo.isRecurring) {
+        // Add to recurring projects
+        setRecurringProjects((prev) => {
+          const existing = prev.find((p) => p.documentId === project.documentId);
+          if (existing) {
+            return prev.map((p) =>
+              p.documentId === project.documentId
+                ? { ...p, todos: [...(p.todos || []), todo] }
+                : p
+            );
+          }
+          return [...prev, { ...project, todos: [todo] }];
+        });
+        
+        // Also add to allRecurringProjects
+        setAllRecurringProjects((prev) => {
+          const existing = prev.find((p) => p.documentId === project.documentId);
+          if (existing) {
+            return prev.map((p) =>
+              p.documentId === project.documentId
+                ? { ...p, todos: [...(p.todos || []), todo] }
+                : p
+            );
+          }
+          return [...prev, { ...project, todos: [todo] }];
+        });
+      } else {
+        // Add to non-recurring projects
+        setProjects((prev) => {
+          const existing = prev.find((p) => p.documentId === project.documentId);
+          if (existing) {
+            return prev.map((p) =>
+              p.documentId === project.documentId
+                ? { ...p, todos: [...(p.todos || []), todo] }
+                : p
+            );
+          }
+          return [...prev, { ...project, todos: [todo] }];
+        });
+      }
+    } else if (todo.category) {
+      if (todo.isRecurring) {
+        // Add to recurring category groups
+        setRecurringCategoryGroups((prev) => {
+          const existing = prev.find((g) => g.title === todo.category);
+          if (existing) {
+            return prev.map((g) =>
+              g.title === todo.category ? { ...g, todos: [...g.todos, todo] } : g
+            );
+          }
+          return [...prev, { title: todo.category!, todos: [todo] }];
+        });
+        
+        // Also add to allRecurringCategoryGroups
+        setAllRecurringCategoryGroups((prev) => {
+          const existing = prev.find((g) => g.title === todo.category);
+          if (existing) {
+            return prev.map((g) =>
+              g.title === todo.category ? { ...g, todos: [...g.todos, todo] } : g
+            );
+          }
+          return [...prev, { title: todo.category!, todos: [todo] }];
+        });
+      } else {
+        // Add to non-recurring category groups
+        setCategoryGroups((prev) => {
+          const existing = prev.find((g) => g.title === todo.category);
+          if (existing) {
+            return prev.map((g) =>
+              g.title === todo.category ? { ...g, todos: [...g.todos, todo] } : g
+            );
+          }
+          return [...prev, { title: todo.category!, todos: [todo] }];
+        });
+      }
+    } else {
+      // Add to incidentals
+      if (todo.isRecurring) {
+        setRecurringIncidentals((prev) => [...prev, todo]);
+        setAllRecurringIncidentals((prev) => [...prev, todo]);
+      } else {
+        setIncidentals((prev) => [...prev, todo]);
+      }
+    }
+  };
+
+  // Remove a todo from all state arrays
+  const removeTodoFromState = (todo: Todo) => {
+    const documentId = todo.documentId;
+    
+    // Remove from projects
+    setProjects((prev) =>
+      prev
+        .map((project) => ({
+          ...project,
+          todos: project.todos?.filter((t) => t.documentId !== documentId) || [],
+        }))
+        .filter((project) => (project.todos?.length || 0) > 0)
+    );
+    
+    setRecurringProjects((prev) =>
+      prev
+        .map((project) => ({
+          ...project,
+          todos: project.todos?.filter((t) => t.documentId !== documentId) || [],
+        }))
+        .filter((project) => (project.todos?.length || 0) > 0)
+    );
+    
+    setAllRecurringProjects((prev) =>
+      prev
+        .map((project) => ({
+          ...project,
+          todos: project.todos?.filter((t) => t.documentId !== documentId) || [],
+        }))
+        .filter((project) => (project.todos?.length || 0) > 0)
+    );
+    
+    // Remove from category groups
+    setCategoryGroups((prev) =>
+      prev
+        .map((group) => ({
+          ...group,
+          todos: group.todos.filter((t) => t.documentId !== documentId),
+        }))
+        .filter((group) => group.todos.length > 0)
+    );
+    
+    setRecurringCategoryGroups((prev) =>
+      prev
+        .map((group) => ({
+          ...group,
+          todos: group.todos.filter((t) => t.documentId !== documentId),
+        }))
+        .filter((group) => group.todos.length > 0)
+    );
+    
+    setAllRecurringCategoryGroups((prev) =>
+      prev
+        .map((group) => ({
+          ...group,
+          todos: group.todos.filter((t) => t.documentId !== documentId),
+        }))
+        .filter((group) => group.todos.length > 0)
+    );
+    
+    // Remove from incidentals
+    setIncidentals((prev) => prev.filter((t) => t.documentId !== documentId));
+    setRecurringIncidentals((prev) => prev.filter((t) => t.documentId !== documentId));
+    setAllRecurringIncidentals((prev) => prev.filter((t) => t.documentId !== documentId));
+  };
+
+  // Update a todo in place (without moving between arrays)
+  const updateTodoInPlace = (updatedTodo: Todo) => {
+    const documentId = updatedTodo.documentId;
+    
+    // Update in projects
+    setProjects((prev) =>
+      prev.map((project) => ({
+        ...project,
+        todos: project.todos?.map((t) =>
+          t.documentId === documentId ? updatedTodo : t
+        ) || [],
+      }))
+    );
+    
+    setRecurringProjects((prev) =>
+      prev.map((project) => ({
+        ...project,
+        todos: project.todos?.map((t) =>
+          t.documentId === documentId ? updatedTodo : t
+        ) || [],
+      }))
+    );
+    
+    setAllRecurringProjects((prev) =>
+      prev.map((project) => ({
+        ...project,
+        todos: project.todos?.map((t) =>
+          t.documentId === documentId ? updatedTodo : t
+        ) || [],
+      }))
+    );
+    
+    // Update in category groups
+    setCategoryGroups((prev) =>
+      prev.map((group) => ({
+        ...group,
+        todos: group.todos.map((t) =>
+          t.documentId === documentId ? updatedTodo : t
+        ),
+      }))
+    );
+    
+    setRecurringCategoryGroups((prev) =>
+      prev.map((group) => ({
+        ...group,
+        todos: group.todos.map((t) =>
+          t.documentId === documentId ? updatedTodo : t
+        ),
+      }))
+    );
+    
+    setAllRecurringCategoryGroups((prev) =>
+      prev.map((group) => ({
+        ...group,
+        todos: group.todos.map((t) =>
+          t.documentId === documentId ? updatedTodo : t
+        ),
+      }))
+    );
+    
+    // Update in incidentals
+    setIncidentals((prev) =>
+      prev.map((t) => (t.documentId === documentId ? updatedTodo : t))
+    );
+    setRecurringIncidentals((prev) =>
+      prev.map((t) => (t.documentId === documentId ? updatedTodo : t))
+    );
+    setAllRecurringIncidentals((prev) =>
+      prev.map((t) => (t.documentId === documentId ? updatedTodo : t))
+    );
+  };
+
+  // Smart update orchestration
+  const updateTodoInState = (updatedTodo: Todo, originalTodo?: Todo) => {
+    if (originalTodo && hasComplexStateChange(originalTodo, updatedTodo)) {
+      // Remove from old location, add to new location
+      removeTodoFromState(originalTodo);
+      addTodoToState(updatedTodo);
+    } else if (originalTodo) {
+      // Simple in-place update
+      updateTodoInPlace(updatedTodo);
+    } else {
+      // New todo - add to appropriate state array
+      addTodoToState(updatedTodo);
+    }
+  };
+
+  // Update project metadata in state
+  const updateProjectInState = (updatedProject: Project) => {
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.documentId === updatedProject.documentId
+          ? { ...updatedProject, todos: p.todos }
+          : p
+      )
+    );
+    
+    setRecurringProjects((prev) =>
+      prev.map((p) =>
+        p.documentId === updatedProject.documentId
+          ? { ...updatedProject, todos: p.todos }
+          : p
+      )
+    );
+    
+    setAllRecurringProjects((prev) =>
+      prev.map((p) =>
+        p.documentId === updatedProject.documentId
+          ? { ...updatedProject, todos: p.todos }
+          : p
+      )
+    );
+  };
+
   useEffect(() => {
     // Fetch visibility settings first to populate cache before filtering todos
     const initializeAndFetchTodos = async () => {
@@ -77,6 +375,15 @@ export default function TodoPage() {
       fetchTodos();
     };
     initializeAndFetchTodos();
+  }, []);
+
+  // Listen for moon phase reset events
+  useEffect(() => {
+    const handleMoonPhaseReset = () => {
+      fetchTodos(false); // Refresh without loading state
+    };
+    window.addEventListener('moon-phase-reset', handleMoonPhaseReset);
+    return () => window.removeEventListener('moon-phase-reset', handleMoonPhaseReset);
   }, []);
 
   useEffect(() => {
@@ -1045,8 +1352,24 @@ export default function TodoPage() {
         }
 
         if (!isInCompletedTodos && !isInLongTodos) {
-          // For todos not in done view, refresh the regular todos
-          await fetchTodos();
+          // Check if this change requires full refresh
+          const needsFullRefresh = 
+            // New recurring todo was created (from completion)
+            (result.newTodo && result.newTodo.isRecurring) ||
+            // displayDate changed (affects visibility)
+            (wasEditingTodo && wasEditingTodo.displayDate !== updatedTodo.displayDate) ||
+            // Recurring status changed
+            (wasEditingTodo && wasEditingTodo.isRecurring !== updatedTodo.isRecurring) ||
+            // Complex project/category/world change
+            (wasEditingTodo && hasComplexStateChange(wasEditingTodo, updatedTodo));
+
+          if (needsFullRefresh) {
+            // Refresh without showing loading state
+            await fetchTodos(false);
+          } else {
+            // Smart update - just update the specific todo in state
+            updateTodoInState(updatedTodo, wasEditingTodo || undefined);
+          }
         }
       }
     } catch (err) {
@@ -1067,6 +1390,9 @@ export default function TodoPage() {
 
       const method = editingProject ? "PUT" : "POST";
 
+      // Store editingProject reference before clearing
+      const wasEditingProject = editingProject;
+
       // Close drawer and reset form immediately (optimistic update)
       closeDrawer();
       setEditingProject(null);
@@ -1078,7 +1404,31 @@ export default function TodoPage() {
       });
 
       if (response.ok) {
-        await fetchTodos();
+        const result = await response.json();
+        const updatedProject = result.data;
+
+        // Check if project's importance or world changed (affects layout placement)
+        const needsFullRefresh = 
+          wasEditingProject && (
+            wasEditingProject.importance !== updatedProject.importance ||
+            wasEditingProject.world !== updatedProject.world
+          );
+
+        if (needsFullRefresh) {
+          // Full refresh needed because layout placement changed
+          await fetchTodos(false);
+        } else if (wasEditingProject) {
+          // Just update project metadata (title, description)
+          updateProjectInState(updatedProject);
+        } else {
+          // New project created - add empty project to state
+          if (updatedProject.world === "life stuff" || 
+              updatedProject.world === "music admin" || 
+              updatedProject.world === "make music" || 
+              updatedProject.world === "computer") {
+            setProjects((prev) => [...prev, { ...updatedProject, todos: [] }]);
+          }
+        }
       }
     } catch (err) {
       console.error("Error saving project:", err);

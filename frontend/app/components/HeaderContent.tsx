@@ -25,7 +25,8 @@ export default function HeaderContent() {
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
-          window.location.reload();
+          // Emit event to trigger todo refresh without full page reload
+          window.dispatchEvent(new CustomEvent('moon-phase-reset'));
         } else {
           console.error("Failed to reset moon phase:", result.error);
         }
