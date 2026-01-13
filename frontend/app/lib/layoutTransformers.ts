@@ -1158,90 +1158,30 @@ export function transformLayout(data: RawTodoData, ruleset: LayoutRuleset): Tran
       return [...Array.from(projectMap.values()), ...Array.from(categoryGroupMap.values())];
     };
 
-    // 1. Combined Section: All todos with dueDate OR recurring todos without dueDate
-    const combinedSections: Section[] = [];
-    const combinedIncidentals: Todo[] = [];
+    // 1. Recurring Section: All visible recurring tasks
+    const recurringSections: Section[] = [];
+    const recurringIncidentals: Todo[] = [];
 
-    // Process recurring projects and category groups - todos with dueDate
+    // Process recurring projects and category groups - all recurring todos
     [...sortedRecurringProjects, ...sortedRecurringCategoryGroups].forEach((section) => {
       const filtered = filterSectionTodosForGoodMorning(section, (todo) => 
-        (isTopOfMindSection(section) || filterDayJob(todo)) && !!todo.dueDate
+        filterDayJob(todo) && todo.isRecurring
       );
       if (filtered) {
-        combinedSections.push(filtered);
+        recurringSections.push(filtered);
       }
     });
 
-    // Process recurring projects and category groups - recurring todos without dueDate
-    [...sortedRecurringProjects, ...sortedRecurringCategoryGroups].forEach((section) => {
-      const filtered = filterSectionTodosForGoodMorning(section, (todo) => 
-        (isTopOfMindSection(section) || filterDayJob(todo)) && !todo.dueDate && todo.isRecurring
-      );
-      if (filtered) {
-        combinedSections.push(filtered);
-      }
-    });
-
-    // Process non-recurring projects and category groups - todos with dueDate
-    [...sortedProjects, ...sortedCategoryGroups].forEach((section) => {
-      const filtered = filterSectionTodosForGoodMorning(section, (todo) => 
-        (isTopOfMindSection(section) || filterDayJob(todo)) && !!todo.dueDate
-      );
-      if (filtered) {
-        combinedSections.push(filtered);
-      }
-    });
-
-    // Process recurring incidentals - todos with dueDate
-    const filteredRecurringIncidentalsDueDate = filterAndTrackIncidentals(
-      sortedRecurringIncidentals,
-      (todo) => filterDayJob(todo) && !!todo.dueDate
-    );
-    combinedIncidentals.push(...filteredRecurringIncidentalsDueDate);
-
-    // Process recurring incidentals - recurring todos without dueDate
+    // Process recurring incidentals - all recurring todos
     const filteredRecurringIncidentals = filterAndTrackIncidentals(
       sortedRecurringIncidentals,
-      (todo) => filterDayJob(todo) && !todo.dueDate && todo.isRecurring
+      (todo) => filterDayJob(todo) && todo.isRecurring
     );
-    combinedIncidentals.push(...filteredRecurringIncidentals);
+    recurringIncidentals.push(...filteredRecurringIncidentals);
 
-    // Process non-recurring incidentals - todos with dueDate
-    const filteredNonRecurringIncidentalsDueDate = filterAndTrackIncidentals(
-      sortedIncidentals,
-      (todo) => filterDayJob(todo) && !!todo.dueDate
-    );
-    combinedIncidentals.push(...filteredNonRecurringIncidentalsDueDate);
-
-    // Process todos with soon=true - add them to combined sections and incidentals
-    // Use ORIGINAL unfiltered data to get soon todos from ALL worlds (including day job)
-    // We need to apply basic filtering (displayDate, recurring status) that would normally be applied
-    
-    // Recurring projects and category groups - todos with soon=true
-    [...data.recurringProjects, ...data.recurringCategoryGroups].forEach((section) => {
-      const todos = "documentId" in section ? section.todos || [] : section.todos;
-      const filteredTodos = todos.filter((todo) => 
-        todo.soon === true && 
-        !includedTodoIds.has(todo.documentId)
-      );
-      
-      filteredTodos.forEach((todo) => includedTodoIds.add(todo.documentId));
-      
-      if (filteredTodos.length > 0) {
-        const sortedTodos = sortTodos(filteredTodos, ruleset.sortBy);
-        if ("documentId" in section) {
-          combinedSections.push({
-            ...section,
-            todos: sortedTodos,
-          });
-        } else {
-          combinedSections.push({
-            ...section,
-            todos: sortedTodos,
-          });
-        }
-      }
-    });
+    // 2. Soon + Top of Mind Section: Non-recurring "soon" tasks + "top of mind" project tasks
+    const soonAndTopOfMindSections: Section[] = [];
+    const soonAndTopOfMindIncidentals: Todo[] = [];
 
     // Non-recurring projects and category groups - todos with soon=true
     [...data.projects, ...data.categoryGroups].forEach((section) => {
@@ -1256,7 +1196,8 @@ export function transformLayout(data: RawTodoData, ruleset: LayoutRuleset): Tran
           }
         }
         
-        return todo.soon === true && 
+        return !todo.isRecurring &&
+          todo.soon === true && 
           !includedTodoIds.has(todo.documentId);
       });
       
@@ -1265,26 +1206,18 @@ export function transformLayout(data: RawTodoData, ruleset: LayoutRuleset): Tran
       if (filteredTodos.length > 0) {
         const sortedTodos = sortTodos(filteredTodos, ruleset.sortBy);
         if ("documentId" in section) {
-          combinedSections.push({
+          soonAndTopOfMindSections.push({
             ...section,
             todos: sortedTodos,
           });
         } else {
-          combinedSections.push({
+          soonAndTopOfMindSections.push({
             ...section,
             todos: sortedTodos,
           });
         }
       }
     });
-
-    // Recurring incidentals - todos with soon=true
-    const filteredRecurringIncidentalsSoon = data.recurringIncidentals.filter((todo) =>
-      todo.soon === true && 
-      !includedTodoIds.has(todo.documentId)
-    );
-    filteredRecurringIncidentalsSoon.forEach((todo) => includedTodoIds.add(todo.documentId));
-    combinedIncidentals.push(...filteredRecurringIncidentalsSoon);
 
     // Non-recurring incidentals - todos with soon=true
     const filteredNonRecurringIncidentalsSoon = data.incidentals.filter((todo) => {
@@ -1297,16 +1230,14 @@ export function transformLayout(data: RawTodoData, ruleset: LayoutRuleset): Tran
         }
       }
       
-      return todo.soon === true && 
+      return !todo.isRecurring &&
+        todo.soon === true && 
         !includedTodoIds.has(todo.documentId);
     });
     filteredNonRecurringIncidentalsSoon.forEach((todo) => includedTodoIds.add(todo.documentId));
-    combinedIncidentals.push(...filteredNonRecurringIncidentalsSoon);
+    soonAndTopOfMindIncidentals.push(...filteredNonRecurringIncidentalsSoon);
 
-    // 2. Top of Mind Section: All non-recurring todos from the "top of mind" project
-    const topOfMindSections: Section[] = [];
-    const topOfMindIncidentals: Todo[] = [];
-
+    // Add all non-recurring todos from the "top of mind" project
     if (topOfMindProjectId) {
       // Use ORIGINAL unfiltered data to get the top of mind project from ANY world (including day job)
       // Don't filter by world - top of mind projects always show up even if they're in "day job"
@@ -1331,7 +1262,7 @@ export function transformLayout(data: RawTodoData, ruleset: LayoutRuleset): Tran
           
           if (filteredTodos.length > 0) {
             const sortedTodos = sortTodos(filteredTodos, ruleset.sortBy);
-            topOfMindSections.push({
+            soonAndTopOfMindSections.push({
               ...project,
               todos: sortedTodos,
             });
@@ -1340,26 +1271,21 @@ export function transformLayout(data: RawTodoData, ruleset: LayoutRuleset): Tran
       });
     }
 
-    // Re-sort todos within combined sections by dueDate (soonest first) for those with dueDate
-    const reSortedCombinedSections = combinedSections.map(reSortSectionTodosByDueDate);
-
     // Merge sections to combine projects by documentId and category groups with the same title
-    // This will merge projects that have both todos with dueDate and recurring todos without dueDate
-    const mergedCombinedSections = mergeSectionsWithProjectMerging(reSortedCombinedSections, "dueDate");
-    const mergedTopOfMindSections = mergeSections(topOfMindSections);
+    const mergedRecurringSections = mergeSectionsWithProjectMerging(recurringSections, "creationDate");
+    const mergedSoonAndTopOfMindSections = mergeSections(soonAndTopOfMindSections, "creationDate");
 
     // Sort all sections and incidentals
-    // Combined sections: sort by dueDate (soonest first) for sections with todos that have dueDate
-    const sortedCombinedSections = sortSections(mergedCombinedSections, "dueDate");
-    const sortedCombinedIncidentals = sortTodos(combinedIncidentals, "dueDate");
-    const sortedTopOfMindSections = sortSections(mergedTopOfMindSections, "creationDate");
-    const sortedTopOfMindIncidentals = sortTodos(topOfMindIncidentals, "creationDate");
+    const finalRecurringSections = sortSections(mergedRecurringSections, "creationDate");
+    const finalRecurringIncidentals = sortTodos(recurringIncidentals, "creationDate");
+    const finalSoonAndTopOfMindSections = sortSections(mergedSoonAndTopOfMindSections, "creationDate");
+    const finalSoonAndTopOfMindIncidentals = sortTodos(soonAndTopOfMindIncidentals, "creationDate");
 
     return {
-      combinedSections: sortedCombinedSections.length > 0 ? sortedCombinedSections : undefined,
-      combinedIncidentals: sortedCombinedIncidentals.length > 0 ? sortedCombinedIncidentals : undefined,
-      topOfMindSections: sortedTopOfMindSections.length > 0 ? sortedTopOfMindSections : undefined,
-      topOfMindIncidentals: sortedTopOfMindIncidentals.length > 0 ? sortedTopOfMindIncidentals : undefined,
+      combinedSections: finalRecurringSections.length > 0 ? finalRecurringSections : undefined,
+      combinedIncidentals: finalRecurringIncidentals.length > 0 ? finalRecurringIncidentals : undefined,
+      topOfMindSections: finalSoonAndTopOfMindSections.length > 0 ? finalSoonAndTopOfMindSections : undefined,
+      topOfMindIncidentals: finalSoonAndTopOfMindIncidentals.length > 0 ? finalSoonAndTopOfMindIncidentals : undefined,
     };
   } else if (ruleset.groupBy === "chores") {
     // Helper to filter out "day job" world
